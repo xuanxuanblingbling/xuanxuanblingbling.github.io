@@ -8,6 +8,7 @@ tags:
 
 ## 基本知识
 本节内容的安全问题主要属于是Android架构上两层的，即应用框架层和应用层
+
 ### 应用框架层
 
 > 仅仅罗列框架的名字是没有用的，如果不能知道这些框架或者组件如何应用，是无法从根本上理解这个分层结构的（暂时放着等待解决）。
@@ -19,19 +20,25 @@ tags:
 - Activity Manager
 - Window Manager
 - Package Manager
+
 ### 应用层
 - 系统应用
 - 其他应用
+
 ### 四大组件
+
 > 应用组件是组成安卓应用的关键部分。每个应用都是由一个或者多个组件组成，并且每个都是单独调用。
+
 - Activity
 - Service
 - Broadcast Receiver
 - Content Provider
+
 ### 问题
 四大组件是哪层的？
 
 ## OWASP top 10
+
 ### M1: 平台使用不当
 - 概述：平台功能的滥用，或者未能使用平台的安全控制，如Intent的误用、权限误用等
 - 风险：很广泛，可能涉及移动平台的各个服务
@@ -325,9 +332,10 @@ http://blog.csdn.net/starflier/article/details/21229301
 逆向+密码学（我暂时不讨论）
 
 ### webview漏洞(M1&M6)
- WebView是一个显示网页的控件：
- - Android4.4版本以下系统里，WebView基于WebKit
- - Android4.4及以上版本系统里，WebView基于Chromium，支持 HTML5 、Javascript等
+
+WebView是一个显示网页的控件：
+- Android4.4版本以下系统里，WebView基于WebKit
+- Android4.4及以上版本系统里，WebView基于Chromium，支持 HTML5 、Javascript等
 
 > WebView是Android组件漏洞的重灾区，主要包括以下下三种类型的漏洞: http://blog.csdn.net/carson_ho/article/details/64904635
 
@@ -701,11 +709,13 @@ Landroid/util/Log;->v(
     - 明文传输漏洞验证:是否采用明文传输敏感信息(密码等)
     - SSL弱加密漏洞验证:使用Fiddler自签名证书进行内容还原
     - SSL强加密:使用Xposed插件进行绕过
-    - 服务端接口分析:是否存在测试接口、未进行身份验证的接口、可暴力爬取敏感数据的 接口等
+    - 服务端接口分析:是否存在测试接口、未进行身份验证的接口、可暴力爬取敏感数据的接口等
+
 ### drozer（检测+验证）
 > 集成静态分析与动态验证的工具，按照逻辑属于动态分析中的调试模式分析。
 - 检测组件暴露、SQL注入等漏洞初步检测
 - 如果存在以上漏洞，验证其风险，是否否导致敏感数据泄漏、验证绕过、非授权操作等。
+
 ### 逆向分析（CTF重点）
 - Java文件逆向分析：  
 采用SDK编写的代码，通过dex2jar、JD-GUI等工具可将其还原为java代码
@@ -714,8 +724,11 @@ Landroid/util/Log;->v(
 - 半调试半逆向：  
 对于一些重要变量的值，可通过在smali代码中添加logcat代码，然后重打包生成新的APK 文件，运行该APK文件时通过DDMS查看logcat的输出
 加密破解以及对逻辑和代码的进一步分析
+
 ### 自动化辅助
+
 #### 开源系统
+
 - MobSF  
 包含Web界面 支持静态和动态分析，App后端Web API漏洞检测
 - Marvin  
@@ -723,5 +736,7 @@ Landroid/util/Log;->v(
 - Inspeckage  
 Xposed插件，包含WEB界面
 能够查看Manifest信息、文件内容、Logcat日志、网 络通信等，能够调用未导出组件
+
 #### 在线系统
+
 腾讯御安全，阿里聚安全，360显危镜，梆梆，娜迦
