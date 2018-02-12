@@ -29,17 +29,17 @@ nightMode: false
 
 # Comments
 disqus: false
-disqus_url: 'https://liaokeyu.disqus.com/embed.js'
+disqus_url: ''
 
 livere: false
-livere_uid: MTAyMC8yODEwMC80Njcz
+livere_uid: 
 
 # Reward 赞赏功能 by Ray-Eldath
 reward:
   enable: false
-  reward_comment: '真诚赞赏 手有余香'
-  wechatpay: 'http://ray-eldath.image.alimmdn.com/basic/wechatpay.jpg'
-  alipay: 'http://ray-eldath.image.alimmdn.com/basic/alipay.jpg'
+  reward_comment: ''
+  wechatpay: ''
+  alipay: ''
 
 # b2t 回到顶部 by Ray-Eldath
 b2t: true
@@ -56,11 +56,11 @@ postPatterns: ' seaOfClouds'
 
 # SNS settings 配置社交网站url: email, weibo, zhihu, twitter, instagram, juejin, github, douban, facebook, dribble, uicn, jianshu, medium, linkedin
 sns:
-  email: 'mailto:ray.eldath@aol.com'
-  weibo: '//weibo.com/lovecolcol'
-  juejin: '//juejin.im/user/57a6f434165abd006159b4cc'
-  instagram: '//www.instagram.com/steveliaocn'
-  github: '//github.com/kaeyleo'
+  email: ''
+  weibo: ''
+  juejin: ''
+  instagram: ''
+  github: ''
 
 # Tags 设置标签
 recommend-tags: true # whether or not display recommend-tags on the sidebar
@@ -73,7 +73,7 @@ exclude: ['node_modules', 'dev', 'package.json', 'gulpfile.js', '.gitignore', 'R
 
 # Markdown
 markdown: redcarpet
-highlighter: rouge
+# highlighter: rouge
 redcarpet:
     extensions: [ "hard_wrap","autolink", "tables", "strikethrough", "superscript", "with_toc_data", "highlight", "prettify","no_intra_emphasis"]
 
