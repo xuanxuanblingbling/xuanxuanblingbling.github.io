@@ -328,9 +328,6 @@ http://blog.csdn.net/starflier/article/details/21229301
 
 思考：是否可以通过验证启动方式来防护呢？
 
-### 弱加密漏洞(M5)
-逆向+密码学（我暂时不讨论）
-
 ### webview漏洞(M1&M6)
 
 WebView是一个显示网页的控件：
