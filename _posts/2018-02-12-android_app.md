@@ -4,7 +4,6 @@ title: 'Android APP常见漏洞和挖掘技巧'
 subtitle: 'XMAN DAY3'
 date: 2018-02-12
 categories: 技术
-cover: '/assets/img/hero.jpg'
 tags: android 逆向
 ---
 
