@@ -5,9 +5,9 @@
 
 # Site
 title: Clang裁缝店
-subtitle:
-description:
-author: xuanxuan
+subtitle: 缝纫机的使用与维修
+description: web菜鸡
+author: 老板娘
 # Support language: de, en, fr-FR, id, ja, ko, pt-BR, pt, ru, zh-Hans, zh-hk, zh-tw
 language: zh-Hans
 date_format: '%Y-%m-%d'
@@ -232,7 +232,8 @@ social_icons:
 
 # Sidebar Avatar
 # in directory: /assets/images/avatar.gif
-#avatar:
+
+avatar: /assets/images/image.jpg
 
 
 # Table Of Contents in the Sidebar
