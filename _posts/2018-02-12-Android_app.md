@@ -79,19 +79,19 @@ tags:
 - Android系统中本地的存储位置包括
     - Shared Preferences
         - 基于XML文件的key-value数据存储方式，一般用于储存应用的配置等信息
-        - 常规位置: `/data/data/<package-name>/shared_prefs/*.xml`
+        - 常规位置: /data/data/<package-name>/shared_prefs/*.xml
     - SQLite Databases
         - 轻量级的关系型数据库
-        - 常规位置: `/data/data/<package-name>/database/*.db`
+        - 常规位置: /data/data/<package-name>/database/*.db
     - Internal Storage
         - 使用设备内部存储器来创建和保存文件，通常情况下内部存储的文件只能被该当前程序访问，不可被其他程序或用户访问 
-        - 常规位置: `/data/data/<package-name>/files/*`
+        - 常规位置: /data/data/<package-name>/files/*
     - External Storage
         - 使用外部存储器(如sd卡等)创建和保存文件，以这种方式创建的文件通常是全局可读的，可被所有具有“READ_EXTERNAL_STORAGE”或“WRITE_EXTERNAL_STORAGE”权限的APP 访问
-        - 其常规路径为:`/mnt/sdcard/*`
+        - 其常规路径为:/mnt/sdcard/*
 #### 成因
-- 创建以上文件时没有使用`MODE_PRIVATE`模式，而是使用了`MODE_WORLD_READABLE`或`MODE_WORLD_WRITEABLE`模式，导致其他程序可以读取内容。
-- 即一般来说`/data/data/<package-name>/`目录下的文件是其他用户不可读的，但是如果使用不恰当的方式创建将会改变文件权限，这样便可能将私密文件泄露给其他用户。
+- 创建以上文件时没有使用MODE_PRIVATE模式，而是使用了MODE_WORLD_READABLE或MODE_WORLD_WRITEABLE模式，导致其他程序可以读取内容。
+- 即一般来说/data/data/<package-name>/目录下的文件是其他用户不可读的，但是如果使用不恰当的方式创建将会改变文件权限，这样便可能将私密文件泄露给其他用户。
 
 #### 检测
 1. 使用adb shell连接手机并获取root权限，浏览/data/data/<package-name>目 录下的shared_pref、database、files等目录，检查是否存在others用户可读 的文件
@@ -140,10 +140,10 @@ private class MyTrustManager implements X509TrustManager{
 - 执行APP并进行网络操作，在Fiddler中查看捕获的数据
 - 检查是否能获得HTTPS通信的明文数据
 2. 代码检测
-- 搜索 `.method public checkServerTrusted([Ljava/security/cert/X509Certificate;Ljava/lang/String;)V`
-- 定位`.method`和`.end method`中间的函数体
-- 检测是否仅有 `return-void`
-- 同理检测`verify(String,SSLSession)` 函数体或者否存在`SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER`
+- 搜索 .method public checkServerTrusted([Ljava/security/cert/X509Certificate;Ljava/lang/String;)V
+- 定位.method和.end method中间的函数体
+- 检测是否仅有 return-void
+- 同理检测verify(String,SSLSession) 函数体或者否存在SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER
 
 
 #### 使用Xposed框架绕过SSL强校验
@@ -228,9 +228,12 @@ $ adb shell am start –n com.isi.testapp/.Welcome
 ```
 
 如果将这个layout渲染过后的确可以看到和启动活动的一样的效果，但这是因为这个布局是写死的静态，如果这个Activity运行起来布局信息将作出更改，则我们也许可以看到一些敏感的信息，如案例中的华为网盘。
+
 ##### BroadcastReceiver暴露导致发送短信
+
 > 样本fourgoats.apk介绍  
 出自OWASP的GoatDroid项目，集成了一堆漏洞的APK，代码未经过混淆与加密，可以反编译后看到比较清晰的逻辑，分析漏洞成因。虽然是许多年前的项目，很多漏洞也早已消失，但对于入门的新手来说还是有一定的价值的。下载地址：https://pan.baidu.com/s/1o957Nku  密码:ssz9  
+
 1. 查看攻击面，找到一个导出的广播接收器
 
 ```bash
@@ -256,12 +259,16 @@ Package: org.owasp.goatdroid.fourgoats
 ```
 
 3. 如何利用？视频中老师直接给出以下这条命令：
-```
+
+```bash
 dz> run app.broadcast.send --action org.owasp.goatdroid.fourgoats.SOCIAL_SMS --extra string phoneNumber 10010 --extra string message hacked!
+
 ```
+
 - 但是很奇怪这里phoneNumber以及message这个变量名字是如何得到的呢？还是只要是发送短信的广播接收器通用接受这两个参数？其实当然不是了。在上课的时候老师跳过了这个步骤，这里应当继续找到这个广播接收器的代码实现。  
 - 因为软件没有加壳没有混淆，所以反编译后目录结构清楚，很容易找SendSMSNowReceiver结果如下：
-```
+
+```java
 package org.owasp.goatdroid.fourgoats.broadcastreceivers;
 
 import android.content.BroadcastReceiver;
@@ -287,10 +294,13 @@ public class SendSMSNowReceiver extends BroadcastReceiver {
     }
 }
 ```
+
 - 在这里我们获取到参数名字，于是可以开心通过Intent去调用SOCIAL_SMS（在Manifest中注册的名字，不是类名SendSMSNowReceive）
-```
+
+```bash
 dz> run app.broadcast.send --action org.owasp.goatdroid.fourgoats.SOCIAL_SMS --extra string phoneNumber 10010 --extra string message hacked!
 ```
+
 4. 这里是发送短信，上课的时候我以为是接收短信，是否可以伪造接受短信呢？
 
 答案是确定的，当系统本身的短信服务**com.android.mms.transaction.SmsReceiverService**出了问题的时候也许就可以去伪造一封短信了。请自行研究。
@@ -343,15 +353,14 @@ Android 4.2之后，只有以@JavascriptInterface进行注解的方法才能被J
 ##### 检测
 1. 代码检测(Android 4.2以上)
 - 使用apktool等工具将APK文件反编译为smali代码
-- 查找通过addJavascriptInterface注册的方法
-```
-Landroid/webkit/WebView;->addJavascriptInterface(
-```
+- 查找通过addJavascriptInterface注册的方法 Landroid/webkit/WebView;->addJavascriptInterface(
+
 - 通过逆向分析，检查该方法是否对用户输入进行合规性检测和过滤
 
 2. 终端检测（编写网页）
 - 即终端的webview控件便于控制，直接访问构造好的网页即可。
-```
+
+```html
 <html>
 	<head> <meta charset="UTF-8" /> </head>
 <body>
@@ -373,13 +382,16 @@ function check(){
 ```
 
 3. 终端检测（Fiddler）
+
 > Fiddler能记录所有客户端和服务器通信的http(s)请求，能够监视、设置断点、修改输入输出数据，能够编写事件脚本程序进行扩展
 https://www.secpulse.com/archives/5525.html
+
 - 即终端的webview控件不便控制
 - 在FiddlerScript中的OnBeforeResponse中加入以下代码 
 - 将手机的网络设置为使用Fiddler的代理
 - 运行APP，任意webview访问任意网页时都会被插入WebView测试代码
-```
+
+```javascript
 oSession.utilDecodeResponse(); if(oSession.oResponse.headers.ExistsAndContains("Content-Type ","text/html") || oSession.utilFindInResponse("<html",false)>-1){ var oBody = System.Text.Encoding.UTF8.GetString(oSession.respo nseBodyBytes);
 oBody = oBody.ToLower();
 var str=”<p>WebView Test</p><script type=\"text/javascript\">v ar str=\"\";for (var obj in window) {try {if (\"getClass\" in window [obj]) {try{window[obj].getClass();str=str+obj;str=str+\"\<br>\";}c atch(e){}}}catch(e) {}}if(str!=\"\"){document.write('<span style=\" color:red\">'+str+'</span>');}</script>"; if(oSession.utilFindInResponse("<head",false)>-1){
@@ -400,12 +412,14 @@ oSession.utilSetResponseBody(oBody);
 - 当javascript通过file url加载执行时，有的浏览器允许JS访问所有的本地文件，有的以目录作为同源性判断条件，有的仅仅允许访问url特指的文件。在file url的javascript中访问其它协议的资源，也是不同时期不同的浏览器有不同标准，有的允许在file协议中通过XmlHttpRequest请求http资源，有的则不允许。
 
 我们知道因为sandbox的存在，Android中的各应用是相互隔离的，在一般情况下A应用是不能访问B应用的文件的，但不正确的使用WebView可能会打破这种隔离，从而带来应用数据泄露的威胁，即A应用可以通过B应用导出的Activity让B应用的Webview加载一个恶意的file协议的url，指向一个其中包括着读取本地敏感信息并且发送给远端js脚本的html页面，从而可以获取B应用的内部私有文件。 
+
 ##### 成因
 
 > APP中的WebView如果打开了对JavaScript的支持，同时未对file:/// 形式的URL做限制，会导致cookie、私有文件、数据库等敏感信息泄漏。
 
 这里要关注4个API来理解WebView中file协议的安全性：
-```
+
+```java
 public class WebViewActivity extends Activity {
     private WebView webView;
     public void onCreate(Bundle savedInstanceState) {
@@ -422,24 +436,25 @@ public class WebViewActivity extends Activity {
     }
  }
 ```
-1. `setAllowFileAccess`   
+
+1. setAllowFileAccess   
 - 默认值是允许（不安全）
 - 通过这个API可以设置是否允许WebView使用File协议
 - 如果不允许使用File协议，则不会存在下述的各种跨源的安全威胁，但同时也限制了webview的功能，使其不能加载本地的html文件。
-2. `setJavaScriptEnabled`  
+2. setJavaScriptEnabled  
 - 默认是不允许（安全，但一般会被开发者打开）
 - 通过此API可以设置是否允许WebView使用JavaScript
 - 但很多应用，包括移动浏览器为了让WebView执行http协议中的javascript，都会主动设置允许WebView执行Javascript，而又不会对不同的协议区别对待。
 - 比较安全的实现是如果加载的url是http或https协议，则启用javascript,如果是其它危险协议，如是file协议，则禁用javascript。
 > 禁用file协议的javascript可以很大程度上减小跨源漏洞对WebView的威胁。当然，禁用file协议的javascript执行并不能完全杜绝跨源文件泄露。例如，有的应用实现了下载功能，对于不可渲染的页面，会自动下载到sd卡中，由于sd卡中的文件所有应用都可以访问，于是可以通过构造一个file URL指向被攻击应用的私有文件，然后用此URL启动Activity，就可以在SD卡中读取被攻击应用的私有文件了。
-3. `setAllowFileAccessFromFileURLs`  
+3. setAllowFileAccessFromFileURLs  
 
 - JELLY_BEAN及以后的版本中默认是禁止（安全）
 - JELLY_BEAN以前的版本默认是允许
 - 通过此API可以设置是否允许通过file
 url加载的Javascript读取其他的本地文件
 
-4. `setAllowUniversalAccessFromFileURLs`  
+4. setAllowUniversalAccessFromFileURLs  
 - JELLY_BEAN及以后的版本中默认是禁止（安全）
 - JELLY_BEAN以前的版本默认是允许
 - 通过此API可以设置是否允许通过file url加载的Javascript可以访问其他的源，包括其他的文件和http,https等其他的源
@@ -448,15 +463,15 @@ url加载的Javascript读取其他的本地文件
 ##### 检测
 1. 代码检测，使用apktool等工具将APK文件反编译为smali代码
     - 检查是否同时满足以下两个条件：
-        - 1. `setAllowFileAccess`是否配置为true或默认值
-            - 搜索`Landroid/webkit/WebSettings;->setAllowFileAccess(Z)V`  
-            - 判断对寄存器的赋值:`const v1 0x1`
-        - 2. `setJavaScriptEnabled`是否配置为true
-            - 搜索`Landroid/webkit/WebSettings;->setJavaScriptEnabled(Z)V`  
-            - 判断对寄存器的赋值:`const v1 0x1`  
-    - 检查`setAllowFileAccessFromFileURLs` 或`setAllowUniversalAccessFromFileURLs`API是否配置为true
-        - 搜索`Landroid/webkit/WebSettings;-> setAllowFileAccessFromFileURLs(Z)V`和 `Landroid/webkit/WebSettings;-> setAllowFileAccessFromFileURLs(Z)V`  
-        - 判断对寄存器的赋值:`const v1 0x1`
+        - 1. setAllowFileAccess是否配置为true或默认值
+            - 搜索Landroid/webkit/WebSettings;->setAllowFileAccess(Z)V  
+            - 判断对寄存器的赋值:const v1 0x1
+        - 2. setJavaScriptEnabled是否配置为true
+            - 搜索Landroid/webkit/WebSettings;->setJavaScriptEnabled(Z)V  
+            - 判断对寄存器的赋值:const v1 0x1  
+    - 检查setAllowFileAccessFromFileURLs 或setAllowUniversalAccessFromFileURLsAPI是否配置为true
+        - 搜索Landroid/webkit/WebSettings;-> setAllowFileAccessFromFileURLs(Z)V和 Landroid/webkit/WebSettings;-> setAllowFileAccessFromFileURLs(Z)V  
+        - 判断对寄存器的赋值:const v1 0x1
 ##### 实验
 （后续补）
 ##### 防护
@@ -467,22 +482,22 @@ url加载的Javascript读取其他的本地文件
 > https://www.zhihu.com/question/265341909
 #### 密码明文存储
 ##### 成因
-- WebView中如果没有设置`setSavePassword(false)`，当用户选择保存在WebView中输入的用户名和密码，则会被明文保存到app目录下的`databases/webview.db`中
+- WebView中如果没有设置setSavePassword(false)，当用户选择保存在WebView中输入的用户名和密码，则会被明文保存到app目录下的databases/webview.db中
 - 具有root权限的攻击者可以获取明文保存的密码，导致敏感数据泄露
 ##### 检测
 - 将APK文件反汇编为smali代码
-- 查找是否存在`WebSettings.setSavePassword(true)`的smali代码:
-    - `Landroid/webkit/WebSettings;->setSavePassword(Z)V`
-    - 判断寄存器的赋值:`const v1 0x1`
+- 查找是否存在WebSettings.setSavePassword(true)的smali代码:
+    - Landroid/webkit/WebSettings;->setSavePassword(Z)V
+    - 判断寄存器的赋值:const v1 0x1
 ### SQL注入漏洞(M7)
 #### 成因
 在使用sqlite数据库时没有采取合适的过滤输入方法，导致sql语句可被拼接以及改写。Android应用一般在如下两个位置来完成数据库的操作：即Content Providers和Activity中。
 #### sqlite
 1. Android中的数据库实现为sqlite，一种轻量级基于文件的数据库。
-2. 一个数据库就是一个db文件，一般保存在`/data/data/<package-name>/databases/*.db`
+2. 一个数据库就是一个db文件，一般保存在/data/data/<package-name>/databases/*.db
 3. db文件可以使用支持查看sqlite的软件打开，如navicat，SQLiteManager等，或者使用sqlite命令直接进入数据库的命令行模式。
 4. 在创建时权限一般为其他用户不可访问的私有数据，权限配置不当会出现数据存储漏洞（漏洞1）。当然root权限可以直接拿到。
-5. sqlite本身不提供加密，但是仍可使用相应的工具对数据库文件进行加密，如`SQLCipher`，微信中的`EnMicroMsg.db`就是采取这种方式加密的。
+5. sqlite本身不提供加密，但是仍可使用相应的工具对数据库文件进行加密，如SQLCipher，微信中的EnMicroMsg.db就是采取这种方式加密的。
 6. 即使是本地加密了数据库，本质上仍是把钥匙和锁放在一起，并没太大作用，破解者可以通过逆向的方式找到加密秘钥。
 #### 实验
 > 实验apk为DIVA，一个故意设计的存在很多漏洞的Android app
@@ -503,7 +518,8 @@ https://www.jianshu.com/p/cdef889736ec
 2. 没有对输入进行有效的过滤
 ###### 检测
 使用drozer进行检测：发现在Projection和Selection处均存在注入
-```
+
+```bash
 dz>run scanner.provider.injection -a jakhar.aseem.diva
 Scanning jakhar.aseem.diva...
 Not Vulnerable:
@@ -518,21 +534,24 @@ Injection in Selection:
   content://jakhar.aseem.diva.provider.notesprovider/notes/
   content://jakhar.aseem.diva.provider.notesprovider/notes
 ```
+
+
 ###### 分析
 1. Projection和Selection是啥?
 
 ContentProvider中重写了query方法
-```
+
+```java
 @Override
 public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder)
-```
+
 其中Projection和Selection为query函数的参数，这两个参数会被拼接到sql语句中，位置如下:
-```
+
 select (projection) from tablename where (selection)
 ```
 
 2. 查看DIVA反编译结果
-```
+```java
   public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
         queryBuilder.setTables(TABLE);
@@ -554,23 +573,27 @@ select (projection) from tablename where (selection)
         return cursor;
     }
 ```
+
 ###### 注入
 使用drozer注入:这里我们使用projection参数注入，当然也可以采用selection注入，不过payload有不同
 1. 爆出表名
-```
+
+```bash
 run app.provider.query content://jakhar.aseem.diva.provider.notesprovider/notes --projection "* FROM SQLITE_MASTER WHERE type='table';--"
 ```
+
 > SQLite数据库中有一个内置表,名为SQLITE_MASTER,此表中存储着当前数据库中所有表的相关信息
 2. 爆出表中数据
-```
+
+```bash
 run app.provider.query content://jakhar.aseem.diva.provider.notesprovider/notes --projection "* FROM notes ;--"
 ```
 
 ##### Activity中注入
 就是整个操作数据库的逻辑在Activity中完成，DIVA中的第七关
 ###### 检测
-因为这种在Activity的操作不方便自动检查，只能去看源码:DIVA中`SQLInjectionActivity`
-```
+因为这种在Activity的操作不方便自动检查，只能去看源码:DIVA中SQLInjectionActivity
+```java
     public void search(View view) {
         EditText srchtxt = (EditText) findViewById(R.id.ivi1search);
         try {
@@ -590,13 +613,15 @@ run app.provider.query content://jakhar.aseem.diva.provider.notesprovider/notes 
             Log.d("Diva-sqli", "Error occurred while searching in database: " + e.getMessage());
         }
     }
-
 ```
+
 ###### 注入
 直接输入框爆出所有用户名密码
-```
+
+```bash
 'or'1'='1
 ```
+
 #### 防护
 无论是哪种方式来操作数据库都应该做好输入的过滤，并且保护好db文件，可采用适当的方式加密
 #### 微信数据库破解
@@ -614,10 +639,12 @@ run app.provider.query content://jakhar.aseem.diva.provider.notesprovider/notes 
 #### 检测
 1. 静态检测  
 - 使用apktool等工具将APK文件反编译为smali代码，检索是否有logcat操作,例如:
-```
+
+```smali
 Landroid/util/Log;->d( 
 Landroid/util/Log;->v(
 ```
+
 2. 动态检测
 - 启动android sdk中的ddms或monitor
 - 打开app并操作，在ddms窗口中选择app并设置要观测的tag，观察logcat日志中是否有敏感内容
@@ -669,7 +696,6 @@ Xposed插件，包含WEB界面
 能够查看Manifest信息、文件内容、Logcat日志、网 络通信等，能够调用未导出组件
 #### 在线系统
 腾讯御安全，阿里聚安全，360显危镜，梆梆，娜迦
-```
+
 ## 签名覆盖！！！（重名）
 ## check ssl 直接改
-```
