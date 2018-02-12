@@ -1,5 +1,5 @@
 ---
-title: Android APP常见漏洞和挖掘技巧 PART1
+title: Android APP常见漏洞和挖掘技巧 PART2
 date: 2018-02-12 00:00:00
 categories:
 - CTF/Android
