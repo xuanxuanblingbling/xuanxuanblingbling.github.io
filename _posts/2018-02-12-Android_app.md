@@ -325,14 +325,18 @@ http://blog.csdn.net/starflier/article/details/21229301
 
 ### 弱加密漏洞(M5)
 逆向+密码学（我暂时不讨论）
+
 ### webview漏洞(M1&M6)
  WebView是一个显示网页的控件：
  - Android4.4版本以下系统里，WebView基于WebKit
  - Android4.4及以上版本系统里，WebView基于Chromium，支持 HTML5 、Javascript等
 
 > WebView是Android组件漏洞的重灾区，主要包括以下下三种类型的漏洞: http://blog.csdn.net/carson_ho/article/details/64904635
+
 #### 任意代码执行
+
 ##### 久远的CVE
+
 - CVE-2012-6636  
 > http://cve.scap.org.cn/CVE-2012-6636.html
 
@@ -342,6 +346,7 @@ http://blog.csdn.net/starflier/article/details/21229301
 > http://cve.scap.org.cn/CVE-2014-1939.html
 
 Android 3.0以后的系统中通过addJavaScriptInterface()添加了一个SearchBoxImpl类的对象 searchBoxJavaBridge_，攻击者通过searchBoxJavaBridge_对象就可以进行反射，从而进行任 意代码执行。
+
 - CVE-2014-7224
 > http://cve.scap.org.cn/CVE-2014-7224.html 
 
@@ -441,12 +446,16 @@ public class WebViewActivity extends Activity {
 - 默认值是允许（不安全）
 - 通过这个API可以设置是否允许WebView使用File协议
 - 如果不允许使用File协议，则不会存在下述的各种跨源的安全威胁，但同时也限制了webview的功能，使其不能加载本地的html文件。
-2. setJavaScriptEnabled  
+
+2. setJavaScriptEnabled 
+
 - 默认是不允许（安全，但一般会被开发者打开）
 - 通过此API可以设置是否允许WebView使用JavaScript
 - 但很多应用，包括移动浏览器为了让WebView执行http协议中的javascript，都会主动设置允许WebView执行Javascript，而又不会对不同的协议区别对待。
 - 比较安全的实现是如果加载的url是http或https协议，则启用javascript,如果是其它危险协议，如是file协议，则禁用javascript。
+
 > 禁用file协议的javascript可以很大程度上减小跨源漏洞对WebView的威胁。当然，禁用file协议的javascript执行并不能完全杜绝跨源文件泄露。例如，有的应用实现了下载功能，对于不可渲染的页面，会自动下载到sd卡中，由于sd卡中的文件所有应用都可以访问，于是可以通过构造一个file URL指向被攻击应用的私有文件，然后用此URL启动Activity，就可以在SD卡中读取被攻击应用的私有文件了。
+
 3. setAllowFileAccessFromFileURLs  
 
 - JELLY_BEAN及以后的版本中默认是禁止（安全）
@@ -455,12 +464,15 @@ public class WebViewActivity extends Activity {
 url加载的Javascript读取其他的本地文件
 
 4. setAllowUniversalAccessFromFileURLs  
+
 - JELLY_BEAN及以后的版本中默认是禁止（安全）
 - JELLY_BEAN以前的版本默认是允许
 - 通过此API可以设置是否允许通过file url加载的Javascript可以访问其他的源，包括其他的文件和http,https等其他的源
 
 > 即使是AllowUniversalAccessFromFileURLs和AllowFileAccessFromFileURLs都为False的情况下，攻击者通过符号链接攻击依旧可以访问本地文件，前提是允许file URL执行javascript(代码中包含view.getSettings().setJavaScriptEnabled(true);
+
 ##### 检测
+
 1. 代码检测，使用apktool等工具将APK文件反编译为smali代码
     - 检查是否同时满足以下两个条件：
         - 1. setAllowFileAccess是否配置为true或默认值
@@ -472,37 +484,56 @@ url加载的Javascript读取其他的本地文件
     - 检查setAllowFileAccessFromFileURLs 或setAllowUniversalAccessFromFileURLsAPI是否配置为true
         - 搜索Landroid/webkit/WebSettings;-> setAllowFileAccessFromFileURLs(Z)V和 Landroid/webkit/WebSettings;-> setAllowFileAccessFromFileURLs(Z)V  
         - 判断对寄存器的赋值:const v1 0x1
+
 ##### 实验
+
 （后续补）
+
 ##### 防护
+
 1. 对于不需要使用file协议的应用，禁用file协议
 2. 对于需要使用file协议的应用，禁止file协议调用javascript
 
 ##### 应用克隆
+
 > https://www.zhihu.com/question/265341909
+
 #### 密码明文存储
+
 ##### 成因
+
 - WebView中如果没有设置setSavePassword(false)，当用户选择保存在WebView中输入的用户名和密码，则会被明文保存到app目录下的databases/webview.db中
 - 具有root权限的攻击者可以获取明文保存的密码，导致敏感数据泄露
+
 ##### 检测
+
 - 将APK文件反汇编为smali代码
 - 查找是否存在WebSettings.setSavePassword(true)的smali代码:
     - Landroid/webkit/WebSettings;->setSavePassword(Z)V
     - 判断寄存器的赋值:const v1 0x1
+
 ### SQL注入漏洞(M7)
+
 #### 成因
+
 在使用sqlite数据库时没有采取合适的过滤输入方法，导致sql语句可被拼接以及改写。Android应用一般在如下两个位置来完成数据库的操作：即Content Providers和Activity中。
+
 #### sqlite
+
 1. Android中的数据库实现为sqlite，一种轻量级基于文件的数据库。
 2. 一个数据库就是一个db文件，一般保存在/data/data/<package-name>/databases/*.db
 3. db文件可以使用支持查看sqlite的软件打开，如navicat，SQLiteManager等，或者使用sqlite命令直接进入数据库的命令行模式。
 4. 在创建时权限一般为其他用户不可访问的私有数据，权限配置不当会出现数据存储漏洞（漏洞1）。当然root权限可以直接拿到。
 5. sqlite本身不提供加密，但是仍可使用相应的工具对数据库文件进行加密，如SQLCipher，微信中的EnMicroMsg.db就是采取这种方式加密的。
 6. 即使是本地加密了数据库，本质上仍是把钥匙和锁放在一起，并没太大作用，破解者可以通过逆向的方式找到加密秘钥。
+
 #### 实验
+
 > 实验apk为DIVA，一个故意设计的存在很多漏洞的Android app
 链接:https://pan.baidu.com/s/1i63a9OL  密码:qrx4
+
 ##### DIVA
+
 > Android App常见安全问题演练分析系统-DIVA-Part1
 https://www.anquanke.com/post/id/84603
 
