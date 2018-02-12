@@ -25,13 +25,13 @@ avatar: '/assets/img/profile.jpg'
 search: true
 
 # Night mode
-nightMode: true
+nightMode: false
 
 # Comments
 disqus: false
 disqus_url: 'https://liaokeyu.disqus.com/embed.js'
 
-livere: true
+livere: false
 livere_uid: MTAyMC8yODEwMC80Njcz
 
 # Reward 赞赏功能 by Ray-Eldath
@@ -52,7 +52,7 @@ social-share-items: ['wechat', 'weibo', 'douban', 'twitter']
 theme-color: 'default'  # pink or default
 
 # Post header background patterns (when the post no cover): circuitBoard, overlappingCircles, food, glamorous, ticTacToe, seaOfClouds
-postPatterns: 'circuitBoard'
+postPatterns: ' seaOfClouds'
 
 # SNS settings 配置社交网站url: email, weibo, zhihu, twitter, instagram, juejin, github, douban, facebook, dribble, uicn, jianshu, medium, linkedin
 sns:
