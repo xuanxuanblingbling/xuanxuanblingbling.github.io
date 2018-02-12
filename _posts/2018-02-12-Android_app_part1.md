@@ -102,10 +102,12 @@ tags:
 
 #### 检测
 
-1. 使用adb shell连接手机并获取root权限，浏览/data/data/<package-name>目 录下的shared_pref、database、files等目录，检查是否存在others用户可读 的文件
+1. 使用adb shell连接手机并获取root权限，浏览/data/data/<package-name>目 录下的shared_pref、database、files等目录，检查是否存在others用户可读的文件
+
 2. 检查shared_pref配置文件、数据库、内部和外部存储的文件中是否明文存 储了敏感信息
 
 ### 数据通信漏洞(M3)
+
 #### 敏感信息明文传输漏洞
 明文直接传，没什么好说的，攻击者通过局域网嗅探、恶意公共WIFI、恶意代理服务、DNS劫持等手段可以捕获客户端和服务端之间的明文通信，获取用户账号密码、登陆 session等敏感信息或者发起中间人攻击(MITM)。
 
@@ -141,15 +143,19 @@ private class MyTrustManager implements X509TrustManager{
 ```
 
 1. 如果客户端APP在实现X509TruestManager类的checkServerTrusted 方法时，函数体为空，则不对服务端证书进行校验，会导致SSL证书弱校验漏洞。
+
 2. 如果客户端APP在使用HttpsURLConnection时，实现自定义 HostnameVerifier过程中未对主机名做验证，则默认不检查证书域名与站点域名是否匹配;或者在设置HttpsURLConnection的HostnameVerifier时，将其设为ALLOW_ALL_HOSTNAME_VERIFIER，则接受所有域名。这种不当的编程方式会导致SSL证书弱校验。
 
 ##### 检测
+
 1. 终端检测：对存在SSL证书弱校验漏洞的APP实施HTTPS中间人攻击
+
 - 开启Fiddler的HTTPS解析功能，生成并导出自签名证书，安装到手机中
 - 开启Fiddler代理，并允许远程主机连接该代理
 - 配置手机使其使用Fiddler提供的代理
 - 执行APP并进行网络操作，在Fiddler中查看捕获的数据
 - 检查是否能获得HTTPS通信的明文数据
+
 2. 代码检测
 - 搜索 .method public checkServerTrusted([Ljava/security/cert/X509Certificate;Ljava/lang/String;)V
 - 定位.method和.end method中间的函数体
@@ -159,19 +165,27 @@ private class MyTrustManager implements X509TrustManager{
 
 #### 使用Xposed框架绕过SSL强校验
 对SSL强校验使用的函数进行Hook，强制使得校验结果为True。
+
 ### 组件暴露漏洞(M1&M6)
+
 #### 成因
+
 - android:exported
 是Activity，Service，Provider，Receiver 组件中都 有的一个属性。用来标识是否支持其它应用调用当前组件。
 - 如果有intent-filter，默认值为true; 没有intent-filter，默认值为false
 -  exported的组件可以被第三方APP调用，在权限控制不当的情况下，可能导致敏感信息泄露、绕过认证、越权行为执行等风险
+
 #### 案例
 - 华为网盘(V7)客户端Activity组件暴露导致本地密码绕过(WooYun-2014-048502)  
 http://wy.hx99.net/bug_detail.php?wybug_id=wooyun-2014-048502
+
 - 小米bugreport程序Receiver组件暴露导致敏感信息暴露 (WooYun-2012-08222)  
  http://wy.hx99.net/bug_detail.php?wybug_id=wooyun-2012-08222
+
 #### 检测
+
 1. 手动查看
+
 - 获取AndroidManifest.xml文件
     - 反编译获得
     - 使用Re浏览器查看/data/app/<package-name>/*.apk，选择查看 AndroidManifest.xml
@@ -179,6 +193,7 @@ http://wy.hx99.net/bug_detail.php?wybug_id=wooyun-2014-048502
     - 具有intent-filter标签时，默认为exported=true
     - 不具有intent-filter标签时，默认为exported=false
 - 导出的组件是否有signature以上级别的权限控制
+
 2. 使用drozer
 
 ```bash
@@ -189,9 +204,13 @@ dz> run app.broadcast.info -a <package-name> -i //查看broadcast receiver信息
 ```
 
 #### 实验
+
 ##### Activity暴露导致绕过认证
+
 > http://bobao.360.cn/learning/detail/122.html  
+
 apk样本: https://pan.baidu.com/s/1eSZZZyi  密码:x07t
+
 - 可以反编译manifest文件查看组件的导出选项是否为ture
 - 或者采用drozer来自动分析app的攻击面
 
@@ -242,8 +261,9 @@ $ adb shell am start –n com.isi.testapp/.Welcome
 
 ##### BroadcastReceiver暴露导致发送短信
 
-> 样本fourgoats.apk介绍  
-出自OWASP的GoatDroid项目，集成了一堆漏洞的APK，代码未经过混淆与加密，可以反编译后看到比较清晰的逻辑，分析漏洞成因。虽然是许多年前的项目，很多漏洞也早已消失，但对于入门的新手来说还是有一定的价值的。下载地址：https://pan.baidu.com/s/1o957Nku  密码:ssz9  
+> 样本fourgoats.apk介绍   
+出自OWASP的GoatDroid项目，集成了一堆漏洞的APK，代码未经过混淆与加密，可以反编译后看到比较清晰的逻辑，分析漏洞成因。虽然是许多年前的项目，很多漏洞也早已消失，但对于入门的新手来说还是有一定的价值的。  
+下载地址：https://pan.baidu.com/s/1o957Nku  密码:ssz9  
 
 1. 查看攻击面，找到一个导出的广播接收器
 
@@ -340,7 +360,7 @@ WebView是一个显示网页的控件：
 - Android4.4版本以下系统里，WebView基于WebKit
 - Android4.4及以上版本系统里，WebView基于Chromium，支持 HTML5 、Javascript等
 
-> WebView是Android组件漏洞的重灾区，主要包括以下下三种类型的漏洞: http://blog.csdn.net/carson_ho/article/details/64904635
+> WebView是Android组件漏洞的重灾区，主要包括以下下三种类型的漏洞:http://blog.csdn.net/carson_ho/article/details/64904635
 
 #### 任意代码执行
 

@@ -99,24 +99,33 @@ tags:
 #### 实验
 
 > 实验apk为DIVA，一个故意设计的存在很多漏洞的Android app
+
 链接:https://pan.baidu.com/s/1i63a9OL  密码:qrx4
 
 ##### DIVA
 
 > Android App常见安全问题演练分析系统-DIVA-Part1
+
 https://www.anquanke.com/post/id/84603
 
 > Android App常见安全问题演练分析系统-DIVA-Part2
+
 https://www.anquanke.com/post/id/86057
 
 
 ##### Content Providers中注入
+
 > ContentProvider使用场景解读
+
 https://www.jianshu.com/p/cdef889736ec
+
 ###### 条件
+
 1. Content Providers组件暴露
 2. 没有对输入进行有效的过滤
+
 ###### 检测
+
 使用drozer进行检测：发现在Projection和Selection处均存在注入
 
 ```bash
@@ -151,6 +160,7 @@ select (projection) from tablename where (selection)
 ```
 
 2. 查看DIVA反编译结果
+
 ```java
   public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
@@ -175,7 +185,9 @@ select (projection) from tablename where (selection)
 ```
 
 ###### 注入
+
 使用drozer注入:这里我们使用projection参数注入，当然也可以采用selection注入，不过payload有不同
+
 1. 爆出表名
 
 ```bash
@@ -183,6 +195,7 @@ run app.provider.query content://jakhar.aseem.diva.provider.notesprovider/notes 
 ```
 
 > SQLite数据库中有一个内置表,名为SQLITE_MASTER,此表中存储着当前数据库中所有表的相关信息
+
 2. 爆出表中数据
 
 ```bash
@@ -190,9 +203,13 @@ run app.provider.query content://jakhar.aseem.diva.provider.notesprovider/notes 
 ```
 
 ##### Activity中注入
+
 就是整个操作数据库的逻辑在Activity中完成，DIVA中的第七关
+
 ###### 检测
+
 因为这种在Activity的操作不方便自动检查，只能去看源码:DIVA中SQLInjectionActivity
+
 ```java
     public void search(View view) {
         EditText srchtxt = (EditText) findViewById(R.id.ivi1search);
@@ -216,6 +233,7 @@ run app.provider.query content://jakhar.aseem.diva.provider.notesprovider/notes 
 ```
 
 ###### 注入
+
 直接输入框爆出所有用户名密码
 
 ```bash
@@ -223,22 +241,33 @@ run app.provider.query content://jakhar.aseem.diva.provider.notesprovider/notes 
 ```
 
 #### 防护
+
 无论是哪种方式来操作数据库都应该做好输入的过滤，并且保护好db文件，可采用适当的方式加密
+
 #### 微信数据库破解
+
 > http://blog.csdn.net/qq_24280381/article/details/73521836
+
 #### SQLCipher之攻与防
+
 > http://www.freebuf.com/articles/database/108904.html
+
 ### logcat数据泄露漏洞(M10)
 
 #### 成因
+
 在APP的开发过程中，为了方便调试，开发者通常会用logcat输出info、debug、error 等信息。如果在APP发布时没有去掉logcat信息，可能会导致攻击者通过查看logcat日志获得敏感信息。
+
 - log.v :详细信息
 - log.d: debug信息 
 - log.i: info信息
 - log.w: warning信息
 - log.e: Error信息
+
 #### 检测
+
 1. 静态检测  
+
 - 使用apktool等工具将APK文件反编译为smali代码，检索是否有logcat操作,例如:
 
 ```smali
@@ -247,6 +276,7 @@ Landroid/util/Log;->v(
 ```
 
 2. 动态检测
+
 - 启动android sdk中的ddms或monitor
 - 打开app并操作，在ddms窗口中选择app并设置要观测的tag，观察logcat日志中是否有敏感内容
 
@@ -254,13 +284,16 @@ Landroid/util/Log;->v(
 ![image](http://ww3.sinaimg.cn/large/0060lm7Tly1fo3htlr2r7j31kw0e6dv6.jpg)
 
 ### 静态分析（检测）
+
 > 快速检测，获得分析重点目标
 
 使用apktool等工具对APK文件进行反编译，对反编译得到的文件和代码进行分析：
 - AndroidManifest文件分析，检查Activity、Service、Receiver、Provider等组件是否存在暴露风险
 - Smali代码分析，通过自动化脚本检测已知特征的漏洞风险，如数据存储漏洞、SSL证书校验漏洞、弱加 密漏洞、webview漏洞等
 
+
 ### 动态分析（验证）
+
 > 对疑似风险进行验证和危害评估，主要是验证静态分析出来的风险
 
 - 调试模式分析：使用adb调试模式进行分析
@@ -278,14 +311,18 @@ Landroid/util/Log;->v(
 
 ### drozer（检测+验证）
 > 集成静态分析与动态验证的工具，按照逻辑属于动态分析中的调试模式分析。
+
 - 检测组件暴露、SQL注入等漏洞初步检测
 - 如果存在以上漏洞，验证其风险，是否否导致敏感数据泄漏、验证绕过、非授权操作等。
 
 ### 逆向分析（CTF重点）
+
 - Java文件逆向分析：  
 采用SDK编写的代码，通过dex2jar、JD-GUI等工具可将其还原为java代码
+
 - So文件逆向分析：  
-采用NDK编写的代码，使用IDA加载so文件进行分析，使用Hex-rays插件将函数体转为C 语言
+采用NDK编写的代码，使用IDA加载so文件进行分析，使用Hex-rays插件将函数体转为C语言
+
 - 半调试半逆向：  
 对于一些重要变量的值，可通过在smali代码中添加logcat代码，然后重打包生成新的APK 文件，运行该APK文件时通过DDMS查看logcat的输出
 加密破解以及对逻辑和代码的进一步分析
