@@ -4,10 +4,10 @@ title: 'Android APP常见漏洞和挖掘技巧'
 subtitle: 'XMAN DAY3'
 date: 2018-02-12
 categories: 技术
-cover: 'http://on2171g4d.bkt.clouddn.com/jekyll-theme-h2o-postcover.jpg'
+cover: '/assets/img/hero.jpg'
 tags: android 逆向
 ---
-[toc]
+
 ## 基本知识
 本节内容的安全问题主要属于是Android架构上两层的，即应用框架层和应用层
 ### 应用框架层
@@ -103,6 +103,7 @@ tags: android 逆向
 #### SSL证书弱校验漏洞
 ##### 成因
 不对Server端证书进行校验导致的TLS中间人攻击，开发者在校验证书时需要实现X509TrustManager类，包括checkClientTrusted、 checkServerTrusted、getAcceptedIssuers三个方法，如下：
+
 ```
 private class MyTrustManager implements X509TrustManager{  
   
