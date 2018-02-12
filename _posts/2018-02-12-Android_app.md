@@ -2,12 +2,12 @@
 title: Android APP常见漏洞和挖掘技巧
 date: 2018-02-12 00:00:00
 categories:
-- test/test
+- CTF/Android
 tags:
 ---
 
 # Android APP常见漏洞和挖掘技巧
-[toc]
+
 ## 基本知识
 本节内容的安全问题主要属于是Android架构上两层的，即应用框架层和应用层
 ### 应用框架层
