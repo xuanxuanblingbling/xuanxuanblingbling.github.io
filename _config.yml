@@ -6,7 +6,7 @@
 # Site
 title: Clang裁缝店
 subtitle: 缝纫机的使用与维修
-description: web菜鸡
+description: Web萌新
 author: 老板娘
 # Support language: de, en, fr-FR, id, ja, ko, pt-BR, pt, ru, zh-Hans, zh-hk, zh-tw
 language: zh-Hans
@@ -19,7 +19,7 @@ baseurl:
 permalink: pretty
 
 # Pagination
-paginate: 10
+paginate: 100
 #paginate_path: "/page:num/"
 #archive:
   #paginate: 10
