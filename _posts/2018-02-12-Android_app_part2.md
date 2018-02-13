@@ -3,7 +3,7 @@ title: Android APP常见漏洞和挖掘技巧 PART2
 date: 2018-02-12 00:00:02
 categories:
 - CTF/Android
-tags:
+tags: drozer sqlite
 ---
 
 ## 基本知识
@@ -283,6 +283,7 @@ Landroid/util/Log;->v(
 - 打开app并操作，在ddms窗口中选择app并设置要观测的tag，观察logcat日志中是否有敏感内容
 
 ## 流程总结
+
 ![image](http://ww3.sinaimg.cn/large/0060lm7Tly1fo3htlr2r7j31kw0e6dv6.jpg)
 
 ### 静态分析（检测）
@@ -312,6 +313,7 @@ Landroid/util/Log;->v(
     - 服务端接口分析:是否存在测试接口、未进行身份验证的接口、可暴力爬取敏感数据的接口等
 
 ### drozer（检测+验证）
+
 > 集成静态分析与动态验证的工具，按照逻辑属于动态分析中的调试模式分析。
 
 - 检测组件暴露、SQL注入等漏洞初步检测
