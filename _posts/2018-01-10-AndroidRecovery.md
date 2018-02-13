@@ -1,6 +1,6 @@
 ---
 title: Android刷机
-date: 2018-01-10 00:00:00
+date: 2018-01-01 00:00:00
 categories:
 - CTF/Android
 tags: Android刷机 kali nethunter
