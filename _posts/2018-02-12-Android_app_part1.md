@@ -85,13 +85,13 @@ tags: drozer webview
 - Android系统中本地的存储位置包括
     - Shared Preferences
         - 基于XML文件的key-value数据存储方式，一般用于储存应用的配置等信息
-        - 常规位置: /data/data/<package-name>/shared_prefs/*.xml
+        - 常规位置: /data/data/package-name/shared_prefs/*.xml
     - SQLite Databases
         - 轻量级的关系型数据库
-        - 常规位置: /data/data/<package-name>/database/*.db
+        - 常规位置: /data/data/package-name/database/*.db
     - Internal Storage
         - 使用设备内部存储器来创建和保存文件，通常情况下内部存储的文件只能被该当前程序访问，不可被其他程序或用户访问 
-        - 常规位置: /data/data/<package-name>/files/*
+        - 常规位置: /data/data/package-name/files/*
     - External Storage
         - 使用外部存储器(如sd卡等)创建和保存文件，以这种方式创建的文件通常是全局可读的，可被所有具有“READ_EXTERNAL_STORAGE”或“WRITE_EXTERNAL_STORAGE”权限的APP 访问
         - 其常规路径为:/mnt/sdcard/*
@@ -99,11 +99,11 @@ tags: drozer webview
 #### 成因
 
 - 创建以上文件时没有使用MODE_PRIVATE模式，而是使用了MODE_WORLD_READABLE或MODE_WORLD_WRITEABLE模式，导致其他程序可以读取内容。
-- 即一般来说/data/data/<package-name>/目录下的文件是其他用户不可读的，但是如果使用不恰当的方式创建将会改变文件权限，这样便可能将私密文件泄露给其他用户。
+- 即一般来说/data/data/package-name/目录下的文件是其他用户不可读的，但是如果使用不恰当的方式创建将会改变文件权限，这样便可能将私密文件泄露给其他用户。
 
 #### 检测
 
-1. 使用adb shell连接手机并获取root权限，浏览/data/data/<package-name>目 录下的shared_pref、database、files等目录，检查是否存在others用户可读的文件
+1. 使用adb shell连接手机并获取root权限，浏览/data/data/package-name/目 录下的shared_pref、database、files等目录，检查是否存在others用户可读的文件
 
 2. 检查shared_pref配置文件、数据库、内部和外部存储的文件中是否明文存 储了敏感信息
 
@@ -189,7 +189,7 @@ http://wy.hx99.net/bug_detail.php?wybug_id=wooyun-2014-048502
 
 - 获取AndroidManifest.xml文件
     - 反编译获得
-    - 使用Re浏览器查看/data/app/<package-name>/*.apk，选择查看 AndroidManifest.xml
+    - 使用Re浏览器查看/data/app/package-name/*.apk，选择查看 AndroidManifest.xml
 - 查看Activity、Receiver、Service、 Provider等组件是否被导出或默认导出
     - 具有intent-filter标签时，默认为exported=true
     - 不具有intent-filter标签时，默认为exported=false

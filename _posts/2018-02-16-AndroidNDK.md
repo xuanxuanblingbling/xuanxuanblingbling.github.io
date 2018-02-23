@@ -163,7 +163,7 @@ JNIEXPORT jstring JNICALL Java_com_xuanxuan_myapplication_MainActivity_getString
 - 返回类型：`jstring`
 - JNI调用：`JNICALL`
 - Java_完整类名_方法名：`Java_com_xuanxuan_myapplication_MainActivity_getString`
-- 函数参数：调用jni.h封装好的函数指针：JNIEnv；Java类本身：`jobject`
+- 函数参数：调用jni.h封装好的函数指针：`JNIEnv`；Java类本身：`jobject`
 
 ### 修改Android.mk以下两项
 
