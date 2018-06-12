@@ -6,6 +6,38 @@ categories:
 tags: 无线安全
 --- 
 
+## 攻击情景——拒绝服务
+
+使你附近的已经连接到无线网络的终端设备掉线，目前无有效手段防御
+
+### 原理
+
+持续伪造热点与终端之间的Deauthentication（解除认证）这个管理帧，此帧是不进行数据加密的，可以任意伪造。
+
+![image](https://xuanxuanblingbling.github.io/assets/pic/deauth.png)
+
+### 方法
+
+- 首先通过airodump-ng进行嗅探，获得要攻击的终端以及终端所连接的接入点的MAC地址
+- 利用aireplay-ng的0号攻击模式，持续注入Deauthentication数据包
+
+```
+# aireplay-ng -0 [攻击次数] -a [AP的MAC地址] -c [STA的MAC地址] wlan0mon
+
+root@kali:~# aireplay-ng -0 99999 -a 00:11:22:33:44:55 -c 55:44:33:22:11:00 wlan0mon
+```
+
+> 淘宝：wifi断网神器
+
+### 防御
+
+Deauth攻击的原理是因为WIFI管理数据帧没有被加密，导致攻击者可以伪造管理帧，从而让攻击者可以任意发送“取消认证”数据包来强行切断AP与客户端的连接。解决方法有是有，但需要路由器支持802.11w协议。（802.11w协议加密了管理数据帧，从而使得WIFI免受Deauth攻击的破坏）以及，WPA3安全协议彻底解决了这个问题。不过WPA 3普及起码得到19年了。
+
+作者：匿名用户  
+链接：https://www.zhihu.com/question/28441447/answer/332869894  
+来源：知乎  
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。 
+
 ## 攻击情景——渗透网络
 
 渗透进入受保护的无线网络
