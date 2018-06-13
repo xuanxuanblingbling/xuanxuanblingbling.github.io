@@ -89,6 +89,12 @@ WEP安全机制被证明是存在漏洞的：利用已知的初始矢量IV和第
 
 ##### 窗口一
 
+- 将网卡置入监听模式
+
+```bash
+root@kali:~ airmon-ng start wlan0
+```
+
 - 扫描附近网络，找到采取WEP方式保护的热点，得到AP的MAC地址以及工作信道
 
 ```bash
@@ -181,6 +187,12 @@ root@kali:~# aircrack-ng test-01.cap
 
 ##### 窗口一
 
+- 将网卡置入监听模式
+
+```bash
+root@kali:~ airmon-ng start wlan0
+```
+
 - 扫描附近网络，找到采取WPA/WPA2方式保护的热点，得到AP的MAC地址以及工作信道
 
 ```bash
@@ -242,6 +254,12 @@ WPA/WPA2密码破解的重点其实不在于握手包的捕获，而在于密码
 > pin码是一个8位的整数，破解过程时间比较短。WPS PIN码的第8位数是一个校验和，因此黑客只需计算前7位数。另外前7位中的前四位和后三位分开认证。所以破解pin码最多只需要1.1万次尝试，顺利的情况下在3小时左右。
 
 #### 方法
+
+- 将网卡置入监听模式
+
+```bash
+root@kali:~ airmon-ng start wlan0
+```
 
 - 通过airodump或者wash嗅探支持WPS的目标：
 
