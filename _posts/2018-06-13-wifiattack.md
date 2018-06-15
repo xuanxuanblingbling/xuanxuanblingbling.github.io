@@ -359,7 +359,7 @@ root@kali:~ driftnet -i at0
 root@kali:~ airbase-ng -a 00:11:22:33:44:55 --essid xuanxuan -c 1 wlan0mon
 ```
 
-### Wifi-pumpkin
+### wifi-pumpkin
 
 使用前不要对网卡进行任何操作，保持wlan0即可，通过配置setting选项卡中的无线设置，点击左侧start即可开启一个恶意的AP
 
