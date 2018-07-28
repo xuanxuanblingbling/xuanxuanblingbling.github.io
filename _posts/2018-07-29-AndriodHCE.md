@@ -1,6 +1,6 @@
 ---
 title: Android HCE开发
-date: 2018-07-28 00:00:00
+date: 2018-07-29 00:00:00
 categories:
 - CTF/Android
 tags: Android HCE
@@ -39,7 +39,7 @@ public class MyHostApduService extends HostApduService {
 
 需要注意，APDU的参数类型都是字节数组，所以这里利用如下的工具方法进行字节数组与字符串（小写）转换：
 
-```JAVA
+```java
 public static byte[] hexStringToByteArray(String s) {
         s=s.toLowerCase();
         int len = s.length();
@@ -80,7 +80,7 @@ public static String bytesToHex(byte[] bytes) {
 
 在application标签中添加service标签
 
-```Xml
+```xml
 <service android:name=".MyHostApduService" android:exported="true"
          android:permission="android.permission.BIND_NFC_SERVICE">
     <intent-filter>
@@ -121,7 +121,7 @@ public static String bytesToHex(byte[] bytes) {
 
 可以在应用初始化的时候设置本应用为默认付款应用，可以在MainActivity的onCreate中实现如下方法：
 
-```JAVA
+```java
 NfcAdapter adapter = NfcAdapter.getDefaultAdapter(this);
 CardEmulation mCardEmulation = CardEmulation.getInstance(adapter);
 ComponentName myComponent = new ComponentName("com.nxp.cascaen.paymenthost",
