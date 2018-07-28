@@ -3,7 +3,7 @@ title: Android HCE开发
 date: 2018-07-28 00:00:00
 categories:
 - CTF/Android
-tags:Android HCE
+tags: Android HCE
 --- 
 
 官方手册：[Host-based card emulation overview](https://developer.android.com/guide/topics/connectivity/nfc/hce)
