@@ -282,6 +282,10 @@ sidebar:
 
 # Blog rolls
 #links_title: Links
+links_title: Links
+links:
+  MacTalk: http://macshuo.com/
+  Title: http://example.com/
 #links_layout: block
 #links_layout: inline
 #links:
