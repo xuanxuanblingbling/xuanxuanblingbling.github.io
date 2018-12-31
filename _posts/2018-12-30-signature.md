@@ -205,7 +205,7 @@ v3版本签名验证证书步骤：（前三步同v2）
 
 > frameworks/base/services/core/java/com/android/server/pm/PackageManagerService.java
 
-```JAVA
+```java
 private void installPackageLI(InstallArgs args, PackageInstalledInfo res) {
 		PackageParser pp = new PackageParser();
         pp.setSeparateProcesses(mSeparateProcesses);
@@ -243,7 +243,7 @@ private void installPackageLI(InstallArgs args, PackageInstalledInfo res) {
 
 > frameworks/base/core/java/android/content/pm/PackageParser.java
 
-```JAVA
+```java
 	public static void collectCertificates(Package pkg, boolean skipVerify)
             throws PackageParserException {
         collectCertificatesInternal(pkg, skipVerify);
@@ -311,7 +311,7 @@ private void installPackageLI(InstallArgs args, PackageInstalledInfo res) {
 
 > frameworks/base/core/java/android/util/apk/ApkSignatureVerifier.java
 
-```JAVA
+```java
 public static PackageParser.SigningDetails verify(String apkPath,
             @SignatureSchemeVersion int minSignatureSchemeVersion)
             throws PackageParserException {
@@ -353,7 +353,7 @@ public static PackageParser.SigningDetails verify(String apkPath,
 
 > frameworks/base/core/java/android/util/apk/ApkSignatureSchemeV3Verifier.java
 
-```JAVA
+```java
 private static final int APK_SIGNATURE_SCHEME_V3_BLOCK_ID = 0xf05368c0;
 public static VerifiedSigner verify(String apkFile)
             throws SignatureNotFoundException, SecurityException, IOException {
@@ -435,7 +435,7 @@ public static VerifiedSigner verify(String apkFile)
 
 > frameworks/base/core/java/android/util/apk/ApkSigningBlockUtils.java
 
-```JAVA
+```java
     static SignatureInfo findSignature(RandomAccessFile apk, int blockId)
             throws IOException, SignatureNotFoundException {
         // Find the ZIP End of Central Directory (EoCD) record.
@@ -472,7 +472,7 @@ public static VerifiedSigner verify(String apkFile)
 
 > frameworks/base/core/java/android/util/apk/ApkSigningBlockUtils.java
 
-```JAVA
+```java
     private static final long APK_SIG_BLOCK_MAGIC_HI = 0x3234206b636f6c42L;
     private static final long APK_SIG_BLOCK_MAGIC_LO = 0x20676953204b5041L;
     private static final int APK_SIG_BLOCK_MIN_SIZE = 32;
@@ -550,7 +550,7 @@ public static VerifiedSigner verify(String apkFile)
 
 > frameworks/base/core/java/android/util/apk/ApkSigningBlockUtils.java
 
-```JAVA
+```java
  static ByteBuffer findApkSignatureSchemeBlock(ByteBuffer apkSigningBlock, int blockId)
             throws SignatureNotFoundException {
         checkByteOrderLittleEndian(apkSigningBlock);
@@ -615,7 +615,7 @@ public static VerifiedSigner verify(String apkFile)
 
 > frameworks/base/core/java/android/util/apk/SignatureInfo.java
 
-```JAVA
+```java
 class SignatureInfo {
     /** Contents of APK Signature Scheme v2 block. */
     public final ByteBuffer signatureBlock;
@@ -658,7 +658,7 @@ class SignatureInfo {
 
 > frameworks/base/core/java/android/util/apk/ApkSignatureSchemeV3Verifier.java
 
-```JAVA
+```java
  private static VerifiedSigner verify(
             RandomAccessFile apk,
             SignatureInfo signatureInfo,
@@ -814,7 +814,7 @@ class SignatureInfo {
 
 回到函数继续分析：
 
-```JAVA
+```java
         int signatureCount = 0;
         int bestSigAlgorithm = -1;
         byte[] bestSigAlgorithmSignatureBytes = null;
@@ -871,7 +871,7 @@ class SignatureInfo {
 |......|
 |......|
 
-```JAVA
+```java
         String keyAlgorithm = getSignatureAlgorithmJcaKeyAlgorithm(bestSigAlgorithm);
         Pair<String, ? extends AlgorithmParameterSpec> signatureAlgorithmParams =
                 getSignatureAlgorithmJcaSignatureAlgorithm(bestSigAlgorithm);
@@ -903,7 +903,7 @@ class SignatureInfo {
 
 用最后的公钥，中间的hash，验证前面的SignatureData：即公钥解密中间的hash，并计算SignatureData的hash进行比对
 
-```JAVA
+```java
         byte[] contentDigest = null;
         signedData.clear();
         ByteBuffer digests = getLengthPrefixedSlice(signedData);
@@ -1024,7 +1024,7 @@ class SignatureInfo {
 
 > frameworks/base/core/java/android/util/apk/ApkSignatureSchemeV3Verifier.java
 
-```JAVA
+```java
     private static final int PROOF_OF_ROTATION_ATTR_ID = 0x3ba06f8c;
     private static VerifiedSigner verifyAdditionalAttributes(ByteBuffer attrs,
             List<X509Certificate> certs, CertificateFactory certFactory) throws IOException {
@@ -1076,7 +1076,7 @@ class SignatureInfo {
 
 > frameworks/base/core/java/android/util/apk/ApkSignatureSchemeV3Verifier.java
 
-```JAVA
+```java
 private static VerifiedProofOfRotation verifyProofOfRotationStruct(
             ByteBuffer porBuf,
             CertificateFactory certFactory)
@@ -1202,7 +1202,7 @@ private static VerifiedProofOfRotation verifyProofOfRotationStruct(
 
 > frameworks/base/core/java/android/util/apk/ApkSignatureSchemeV3Verifier.java
 
-```JAVA
+```java
     public static class VerifiedProofOfRotation {
         public final List<X509Certificate> certs;
         public final List<Integer> flagsList;
@@ -1247,7 +1247,7 @@ private static VerifiedProofOfRotation verifyProofOfRotationStruct(
 
 > frameworks/base/core/java/android/util/apk/ApkSignatureVerifier.java
 
-```JAVA
+```java
  try {
             ApkSignatureSchemeV3Verifier.VerifiedSigner vSigner =
                     ApkSignatureSchemeV3Verifier.verify(apkPath);
@@ -1275,7 +1275,7 @@ private static VerifiedProofOfRotation verifyProofOfRotationStruct(
 
 > frameworks/base/services/core/java/com/android/server/pm/PackageManagerService.java
 
-```Java
+```java
  if (bp != null) {
                     // If the defining package is signed with our cert, it's okay.  This
                     // also includes the "updating the same package" case, of course.
@@ -1317,7 +1317,7 @@ private static VerifiedProofOfRotation verifyProofOfRotationStruct(
 
 > frameworks/base/core/java/android/content/pm/PackageParser.java
 
-```JAVA
+```java
         public boolean checkCapability(SigningDetails oldDetails, @CertCapabilities int flags) {
             if (this == UNKNOWN || oldDetails == UNKNOWN) {
                 return false;
@@ -1343,7 +1343,7 @@ private static VerifiedProofOfRotation verifyProofOfRotationStruct(
 
 > frameworks/base/core/java/android/content/pm/PackageParser.java
 
-```JAVA
+```java
  public boolean hasCertificate(Signature signature, @CertCapabilities int flags) {
             return hasCertificateInternal(signature, flags);
         }
