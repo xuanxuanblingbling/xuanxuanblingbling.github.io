@@ -2,9 +2,9 @@
 title: 无线攻击示例
 date: 2018-06-13 00:00:00
 categories:
-- CTF/WIFI
+- Wireless/Wifi
 tags: 无线安全
---- 
+---
 
 ## 攻击情景——拒绝服务
 
@@ -236,7 +236,7 @@ WPA/WPA2密码破解的重点其实不在于握手包的捕获，而在于密码
 ##### airolib-ng
 
 ##### john
- 
+
 ##### cowpatty
 
 ##### pyrit
