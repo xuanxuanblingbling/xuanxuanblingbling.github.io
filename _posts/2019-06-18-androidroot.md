@@ -31,7 +31,7 @@ Android的内核就是Linux，所以Android获取root其实和Linux获取root权
 
 ### 区别
 
-但是Android毕竟和linux不同，不同就体现在对于权限功能所提供给用户的接口是不同的。比如二进制程序`su`，再比如用户信息文件`/etc/passwd`：
+但是Android毕竟和linux不同，不同就体现在对于权限功能所提供给用户的接口是不同的。比如二进制程序`su`，再比如用户信息文件`/etc/passwd`：
 
 #### su
 
