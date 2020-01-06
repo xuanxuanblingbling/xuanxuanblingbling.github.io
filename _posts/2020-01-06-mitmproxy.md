@@ -6,6 +6,8 @@ categories:
 tags: 
 ---
 
+> 折腾了三个晚上终于搞定了
+
 ```c
 https://downloads.openwrt.org/releases/19.07.0-rc2/targets/brcm2708/bcm2710/openwrt-19.07.0-rc2-brcm2708-bcm2710-rpi-3-ext4-sysupgrade.img.gz
 
