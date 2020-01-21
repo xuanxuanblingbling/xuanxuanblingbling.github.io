@@ -43,6 +43,12 @@ wget https://raw.githubusercontent.com/python/cpython/3.7/Lib/webbrowser.py
 mitmweb
 
 cd mitmproxy/ && . venv/bin/activate && mitmweb
+
+sudo dd if=/dev/disk2 of=openmitm.img bs=1m count=600
+sudo dd if=openmitm.img of=/dev/disk2 bs=1m
+
+ssh root@192.168.2.1 "export LANG=en_US.UTF-8 && cd ~/mitmproxy/ && . venv/bin/activate && mitmweb --mode transparent"
+ssh root@192.168.2.1 "ifconfig br-lan promisc && tcpdump -i br-lan 'tcp port ! 22' -s 0 -w -" | wireshark -k -i -
 ```
 
 
