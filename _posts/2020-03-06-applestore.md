@@ -3,7 +3,7 @@ title: 和媳妇一起学Pwn 之 applestore
 date: 2020-03-06 00:00:00
 categories:
 - CTF/Pwn
-tags: pwnable.tw matlab 劫持ebp 栈迁移 栈堆结合 未初始化变量
+tags: pwnable.tw matlab 劫持ebp 栈帧 栈迁移 栈堆结合 未初始化变量
 ---
 
 > 漏洞点是：本题预留了一个彩蛋，触发后可将一块栈内存的地址记录到堆上，并且可通过一些函数的输入控制这块栈内存。
@@ -546,14 +546,65 @@ io.interactive()
 
 #### 未清空数据的利用
 
+刚才程序运行崩溃是因为，那个被记录到堆上的栈地址所对应的栈空间，在打印的过程中被其他函数所使用，例如printf等，于是在按照程序的逻辑执行就可能会访问到非法的地址，进而程序崩溃。但是本题的这些函数，均可以通过输入控制这块栈空间。具体来说这个栈空间，即为checkout函数中ebp-0x20到ebp-0x10这段内存：
 
+```c
+unsigned int checkout()
+{
+  int v1; // [esp+10h] [ebp-28h]
+  char *v2; // [esp+18h] [ebp-20h]
+  int v3; // [esp+1Ch] [ebp-1Ch]
+  unsigned int v4; // [esp+2Ch] [ebp-Ch]
+```
 
+通过了解本题的栈帧我们知道add,delete,cart,checkout，进入这四个函数后，ebp的值是相同的，并且可以将输入的字符串存储到自己的栈上，例如cart函数：
 
+```c
+int cart()
+{
+  signed int v0; // eax
+  signed int v2; // [esp+18h] [ebp-30h]
+  int v3; // [esp+1Ch] [ebp-2Ch]
+  _DWORD *i; // [esp+20h] [ebp-28h]
+  char buf; // [esp+26h] [ebp-22h]
+  unsigned int v6; // [esp+3Ch] [ebp-Ch]
 
+  v6 = __readgsdword(0x14u);
+  v2 = 1;
+  v3 = 0;
+  printf("Let me check your cart. ok? (y/n) > ");
+  fflush(stdout);
+  my_read(&buf, 0x15u);
+  if ( buf == 121 )
+```
+
+输入的buf被存储到栈上距离ebp偏移为-0x22字节，故只要跳过前两个字节，即可以控制那段checkout中的目标内存。而且允许输入的大小为0x15，长度完全够用，只要第一个字符为y，便可以进入打印逻辑。再例如delete函数中的输入逻辑：
+
+```c
+unsigned int delete()
+{
+  signed int v1; // [esp+10h] [ebp-38h]
+  _DWORD *v2; // [esp+14h] [ebp-34h]
+  int v3; // [esp+18h] [ebp-30h]
+  int v4; // [esp+1Ch] [ebp-2Ch]
+  int v5; // [esp+20h] [ebp-28h]
+  char nptr; // [esp+26h] [ebp-22h]
+  unsigned int v7; // [esp+3Ch] [ebp-Ch]
+
+  v7 = __readgsdword(0x14u);
+  v1 = 1;
+  v2 = (_DWORD *)dword_804B070;
+  printf("Item Number> ");
+  fflush(stdout);
+  my_read(&nptr, 0x15u);
+  v3 = atoi(&nptr);
+```
+
+可见，delete和cart的输入偏移是一致的，均为ebp-22h，不过最后输入需要经过atoi转换成整型，才能进行正常的删除操作。所以这里可以用0x00截断的方式来填充前2个字节，也就是说我们只能控制个位编号的元素删除。有了如上的利用方式，我们就能伪造一个节点，进行打印或者删除操作。那我们利用打印或者删除能做什么呢？一般打印是信息泄露，删除是内存写。
 
 ### 泄露libc基址和heap段地址
 
-有了这个漏洞能控制构造一个伪造的节点，我们能做些什么呢？首先一般是信息泄露，本题我们可以首先泄露libc基址，以及堆段的地址。不过泄露有啥用呢？暂时看不出来。我们通过cart函数便可以打印双链表的一些数据，并且我们控制第27个节点，即栈上的内存。我们可以构造如下节点：
+首先一般是信息泄露，本题我们可以首先泄露libc基址，以及堆段的地址。不过泄露有啥用呢？暂时看不出来。我们通过cart函数便可以打印双链表的一些数据，并且我们控制第27个节点，即栈上的内存。我们可以构造如下节点：
 
 - 前四个字节为漏洞程序的GOT表中一项的地址
 - 再四个字节随意
@@ -927,7 +978,16 @@ $1 = (void *) 0x804b044
 
 #### 劫持ebp与栈迁移的异同
 
-关于栈迁移：
+
+|          | 劫持ebp                                                      | 劫持esp(栈迁移)                                              |
+| -------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| 途径     | 1.   在一个函数执行的过程中控制old_ebp内存，当函数leave时，即可劫持ebp    <br />2. 在劫持eip的前提下，找到可以修改ebp的gadget，然后劫持过去 | 劫持ebp的前提下，当函数leave时，即可劫持esp                  |
+| 用途     | 1.   劫持ebp后，当前函数使用的参数和局部变量均根据ebp从栈上取值，故参数和局部变量均可被控      <br />2. 用于劫持esp | 用于ROP，或者扩大栈空间以完成ROP                             |
+| 前提能力 | 关键内存写 or 劫持eip                                        | 劫持ebp                                                      |
+| 扩大能力 | 1. 扩大可以控制的内存范围     <br /> 2. 可能控制ebp          | 1. 劫持eip    <br />2. 使程序满足一系列状态（内存，寄存器），即扩大可以控制的内存和寄存器范围 |
+
+
+##### 关于栈迁移
 
 - [CTF-wiki: stack-pivoting](https://ctf-wiki.github.io/ctf-wiki/pwn/linux/stackoverflow/fancy-rop-zh/#stack-pivoting)
 - [和媳妇一起学Pwn 之 3x17](https://xuanxuanblingbling.github.io/ctf/pwn/2019/09/06/317/)
@@ -937,12 +997,20 @@ $1 = (void *) 0x804b044
 3. 例如在3x17这道题中，栈迁移是为了解决劫持了eip，但是不知道往哪跳的问题，因为从`劫持控制流`到`漏洞利用`之间还有程序状需要满足（例如函数参数，需要栈上或者寄存器的值要满足一定的条件）
 4. 还有人说，栈迁移主要是为了解决栈溢出可以溢出空间大小不足的问题
 
+所以可以说栈迁移就要劫持esp
+
+##### 用途
+
+栈迁移与劫持ebp的用途区别：
+
 - 本题是劫持ebp后，通过函数逻辑中的输入控制了栈上的数据，这个输入到栈空间的位置，是由ebp决定的。
 - 而栈迁移后面跟的是ROP，布置的ROP链跟esp相关。
 
+##### 途径
+
 劫持ebp的途径：
 
-1. 如本题，修改ebp寄存器指向的内存，然后leave，ret，回到父级函数时，ebp已经被劫持
+1. 可以控制相应内存，如本题，修改ebp寄存器指向的内存，然后leave，ret，回到父级函数时，ebp已经被劫持
 2. 已经可以控制程序流，则可以跳转到一些gadget进而控制ebp
 
 劫持esp的途径：
