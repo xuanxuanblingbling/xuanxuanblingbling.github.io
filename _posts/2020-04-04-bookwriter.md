@@ -3,7 +3,7 @@ title: 和媳妇一起学Pwn 之 BookWriter
 date: 2020-04-04 00:00:00
 categories:
 - CTF/Pwn
-tags: pwnable.tw  BookWriter
+tags: pwnable.tw  
 ---
 
 > 本题总结点较多，之后总结
