@@ -6,7 +6,7 @@ categories:
 tags: 堆喷 堆风水
 ---
 
-> 这是一道堆喷思想和堆风水思想结合的题目
+> 这是一道堆喷思想和堆风水思想结合的题目，漏洞点是堆上变量初始化。利用方式和本题代码强相关，通过堆喷思想控制堆上的未初始化的变量，然后综合利用堆风水和堆喷泄露出堆块的布局信息以及libc基址，然后在利用堆喷思想劫持控制流并完成栈迁移到堆上，最后进行ROP即可getshell。
 
 - [堆喷思想在glibc pwn中的应用](https://xz.aliyun.com/t/7189)
 - [Glibc PWN“堆风水”应用详解](https://mp.weixin.qq.com/s/h9rUtDXJk0LpGUA1cFFbRA)
