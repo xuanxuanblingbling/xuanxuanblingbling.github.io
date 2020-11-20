@@ -1,0 +1,764 @@
+## Flattened Device Tree blob at 80700000
+   Booting using the fdt blob at 0x80700000
+   Loading Device Tree to 816f9000, end 816ffd7a ... OK
+Cannot setup simplefb: node not found
+
+Starting kernel ...
+
+[    0.000000] Booting Linux on physical CPU 0x0
+[    0.000000] Linux version 5.4.75 (aodzip@ThinkPad-X1) (gcc version 8.4.0 (Buildroot -g99ab117-dirty)) #1 Fri Nov 13 16:47:42 CST 2020
+[    0.000000] CPU: ARM926EJ-S [41069265] revision 5 (ARMv5TEJ), cr=0005317f
+[    0.000000] CPU: VIVT data cache, VIVT instruction cache
+[    0.000000] OF: fdt: Machine model: HatLab BADGE200
+[    0.000000] Memory policy: Data cache writeback
+[    0.000000] cma: Reserved 16 MiB at 0x83000000
+[    0.000000] Built 1 zonelists, mobility grouping on.  Total pages: 16256
+[    0.000000] Kernel command line: console=ttyS0,115200 earlyprintk rootwait init=/preinit consoleblank=0 net.ifnames=0 biosdevname=0 rootfstype=jffs2 root=/dev/mtdblock3 overlayfsdev=/dev/mtdblock5
+[    0.000000] Dentry cache hash table entries: 8192 (order: 3, 32768 bytes, linear)
+[    0.000000] Inode-cache hash table entries: 4096 (order: 2, 16384 bytes, linear)
+[    0.000000] mem auto-init: stack:off, heap alloc:off, heap free:off
+[    0.000000] Memory: 37700K/65536K available (7168K kernel code, 260K rwdata, 1744K rodata, 1024K init, 226K bss, 11452K reserved, 16384K cma-reserved)
+[    0.000000] SLUB: HWalign=32, Order=0-3, MinObjects=0, CPUs=1, Nodes=1
+[    0.000000] NR_IRQS: 16, nr_irqs: 16, preallocated irqs: 16
+[    0.000000] random: get_random_bytes called from start_kernel+0x254/0x444 with crng_init=0
+[    0.000051] sched_clock: 32 bits at 24MHz, resolution 41ns, wraps every 89478484971ns
+[    0.000140] clocksource: timer: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 79635851949 ns
+[    0.000939] Console: colour dummy device 80x30
+[    0.001045] Calibrating delay loop... 203.16 BogoMIPS (lpj=1015808)
+[    0.070265] pid_max: default: 32768 minimum: 301
+[    0.070799] Mount-cache hash table entries: 1024 (order: 0, 4096 bytes, linear)
+[    0.070852] Mountpoint-cache hash table entries: 1024 (order: 0, 4096 bytes, linear)
+[    0.072798] CPU: Testing write buffer coherency: ok
+[    0.074944] Setting up static identity map for 0x80100000 - 0x80100058
+[    0.076159] devtmpfs: initialized
+[    0.088074] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604462750000 ns
+[    0.088142] futex hash table entries: 256 (order: -1, 3072 bytes, linear)
+[    0.092524] pinctrl core: initialized pinctrl subsystem
+[    0.095090] NET: Registered protocol family 16
+[    0.098975] DMA: preallocated 256 KiB pool for atomic coherent allocations
+[    0.101481] cpuidle: using governor menu
+[    0.148510] SCSI subsystem initialized
+[    0.148957] usbcore: registered new interface driver usbfs
+[    0.149143] usbcore: registered new interface driver hub
+[    0.149323] usbcore: registered new device driver usb
+[    0.149798] mc: Linux media interface: v0.10
+[    0.149899] videodev: Linux video capture interface: v2.00
+[    0.149996] pps_core: LinuxPPS API ver. 1 registered
+[    0.150013] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+[    0.150093] PTP clock support registered
+[    0.151259] ion_parse_dt_heap_common: id 4 type 4 name cma align 1000
+[    0.152500] Advanced Linux Sound Architecture Driver Initialized.
+[    0.153875] Bluetooth: Core ver 2.22
+[    0.154095] NET: Registered protocol family 31
+[    0.154119] Bluetooth: HCI device and connection manager initialized
+[    0.154163] Bluetooth: HCI socket layer initialized
+[    0.154189] Bluetooth: L2CAP socket layer initialized
+[    0.154253] Bluetooth: SCO socket layer initialized
+[    0.155530] clocksource: Switched to clocksource timer
+[    0.187001] thermal_sys: Registered thermal governor 'step_wise'
+[    0.187721] NET: Registered protocol family 2
+[    0.189298] tcp_listen_portaddr_hash hash table entries: 512 (order: 0, 4096 bytes, linear)
+[    0.189394] TCP established hash table entries: 1024 (order: 0, 4096 bytes, linear)
+[    0.189450] TCP bind hash table entries: 1024 (order: 0, 4096 bytes, linear)
+[    0.189498] TCP: Hash tables configured (established 1024 bind 1024)
+[    0.189826] UDP hash table entries: 256 (order: 0, 4096 bytes, linear)
+[    0.189892] UDP-Lite hash table entries: 256 (order: 0, 4096 bytes, linear)
+[    0.190453] NET: Registered protocol family 1
+[    0.193336] NetWinder Floating Point Emulator V0.97 (double precision)
+[    0.195205] Initialise system trusted keyrings
+[    0.195925] workingset: timestamp_bits=30 max_order=14 bucket_order=0
+[    0.217762] squashfs: version 4.0 (2009/01/31) Phillip Lougher
+[    0.218389] jffs2: version 2.2. (NAND) (SUMMARY)  © 2001-2006 Red Hat, Inc.
+[    0.333863] Key type asymmetric registered
+[    0.333900] Asymmetric key parser 'x509' registered
+[    0.334059] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 247)
+[    0.334084] io scheduler mq-deadline registered
+[    0.334100] io scheduler kyber registered
+[    0.336960] sun4i-usb-phy 1c13400.phy: Couldn't request ID GPIO
+[    0.348823] suniv-f1c100s-pinctrl 1c20800.pinctrl: initialized sunXi PIO driver
+[    0.373751] Serial: 8250/16550 driver, 8 ports, IRQ sharing disabled
+[    0.382973] suniv-f1c100s-pinctrl 1c20800.pinctrl: 1c20800.pinctrl supply vcc-pe not found, using dummy regulator
+[    0.384416] printk: console [ttyS0] disabled
+[    0.404749] 1c25000.serial: ttyS0 at MMIO 0x1c25000 (irq = 27, base_baud = 6250000) is a 16550A
+[    0.874657] printk: console [ttyS0] enabled
+[    0.880581] suniv-f1c100s-pinctrl 1c20800.pinctrl: 1c20800.pinctrl supply vcc-pa not found, using dummy regulator
+[    0.912537] 1c25400.serial: ttyS1 at MMIO 0x1c25400 (irq = 28, base_baud = 6250000) is a 16550A
+[    0.921901] serial serial0: tty port ttyS1 registered
+[    0.932183] suniv-f1c100s-pinctrl 1c20800.pinctrl: 1c20800.pinctrl supply vcc-pd not found, using dummy regulator
+[    0.953816] panel-simple panel: panel supply power not found, using dummy regulator
+[    0.963471] SCSI Media Changer driver v0.25 
+[    0.969405] suniv-f1c100s-pinctrl 1c20800.pinctrl: 1c20800.pinctrl supply vcc-pc not found, using dummy regulator
+[    0.982278] spi-nand spi0.0: GigaDevice SPI NAND was found.
+[    0.987983] spi-nand spi0.0: 128 MiB, block size: 128 KiB, page size: 2048, OOB size: 64
+[    0.997594] 6 fixed-partitions partitions found on MTD device spi0.0
+[    1.003953] Creating 6 MTD partitions on "spi0.0":
+[    1.008877] 0x000000000000-0x000000080000 : "u-boot"
+[    1.019748] 0x000000080000-0x0000000a0000 : "dtb"
+[    1.028899] 0x000000100000-0x000000800000 : "kernel"
+[    1.036934] random: fast init done
+[    1.067260] 0x000000800000-0x000004800000 : "rom"
+[    1.309130] 0x000004800000-0x000005800000 : "extra"
+[    1.376488] 0x000005800000-0x000007800000 : "overlay"
+[    1.502685] ehci_hcd: USB 2.0 'Enhanced' Host Controller (EHCI) Driver
+[    1.509339] ehci-platform: EHCI generic platform driver
+[    1.515003] ohci_hcd: USB 1.1 'Open' Host Controller (OHCI) Driver
+[    1.521315] ohci-platform: OHCI generic platform driver
+[    1.527126] usbcore: registered new interface driver usb-storage
+[    1.535030] i2c /dev entries driver
+[    1.539314] suniv-f1c100s-pinctrl 1c20800.pinctrl: 1c20800.pinctrl supply vcc-pd not found, using dummy regulator
+[    1.559085] aw9523b_gpio 0-005b: with id 0x23 registered.
+[    1.565402] axp20x-i2c 0-0034: AXP20x variant AXP199 found
+[    1.588894] input: axp20x-pek as /devices/platform/soc/1c27000.i2c/i2c-0/0-0034/axp199-pek/input/input0
+[    1.602978] axp20x-i2c 0-0034: AXP20X driver loaded
+[    1.609769] suniv-f1c100s-pinctrl 1c20800.pinctrl: pin PE0 already requested by 1c25000.serial; cannot claim for 1cb0000.csi
+[    1.621097] suniv-f1c100s-pinctrl 1c20800.pinctrl: pin-128 (1cb0000.csi) status -22
+[    1.628805] suniv-f1c100s-pinctrl 1c20800.pinctrl: could not request pin 128 (PE0) from group PE0  on device 1c20800.pinctrl
+[    1.640035] sun4i-csi 1cb0000.csi: Error applying setting, reverse things back
+[    1.647329] sun4i-csi: probe of 1cb0000.csi failed with error -22
+[    1.654048] axp20x-usb-power-supply axp20x-usb-power-supply: DMA mask not set
+[    1.662847] axp20x-battery-power-supply axp20x-battery-power-supply: DMA mask not set
+[    1.671389] axp20x-ac-power-supply axp20x-ac-power-supply: DMA mask not set
+[    1.679944] sunxi-wdt 1c20ca0.watchdog: Watchdog enabled (timeout=16 sec, nowayout=0)
+[    1.690092] suniv-f1c100s-pinctrl 1c20800.pinctrl: 1c20800.pinctrl supply vcc-pf not found, using dummy regulator
+[    1.728100] sunxi-mmc 1c0f000.mmc: initialized, max. request size: 16384 KB
+[    1.737703] usbcore: registered new interface driver usbhid
+[    1.743277] usbhid: USB HID core driver
+[    1.747565] sunxi-cedar 1c0e000.video-codec: sunxi cedar version 0.01alpha
+[    1.754768] sunxi-cedar 1c0e000.video-codec: cedar-ve the get irq is 20
+[    1.763607] axp20x-adc axp20x-adc: DMA mask not set
+[    1.776126] debugfs: Directory '1c23c00.codec' with parent 'F1C100s Audio Codec' already present!
+[    1.790002] sun4i-codec 1c23c00.codec: Codec <-> 1c23c00.codec mapping ok
+[    1.806078] NET: Registered protocol family 17
+[    1.810975] Bluetooth: RFCOMM TTY layer initialized
+[    1.816028] Bluetooth: RFCOMM socket layer initialized
+[    1.821220] Bluetooth: RFCOMM ver 1.11
+[    1.825023] Bluetooth: BNEP (Ethernet Emulation) ver 1.3
+[    1.830413] Bluetooth: BNEP filters: protocol multicast
+[    1.835703] Bluetooth: BNEP socket layer initialized
+[    1.840667] Bluetooth: HIDP (Human Interface Emulation) ver 1.2
+[    1.846643] Bluetooth: HIDP socket layer initialized
+[    1.851656] Key type dns_resolver registered
+[    1.857409] Loading compiled-in X.509 certificates
+[    1.882999] sun4i-drm soc:display-engine: bound 1e00000.display-frontend (ops 0xc0839e98)
+[    1.892056] sun4i-drm soc:display-engine: bound 1e60000.display-backend (ops 0xc08396dc)
+[    1.901649] sun4i-drm soc:display-engine: bound 1c0c000.lcd-controller (ops 0xc083827c)
+[    1.910243] sun4i-drm soc:display-engine: bound 1c0a000.tv-encoder (ops 0xc0838f9c)
+[    1.918025] [drm] Supports vblank timestamp caching Rev 2 (21.10.2013).
+[    1.924628] [drm] No driver support for vblank timestamp query.
+[    1.932239] [drm] Initialized sun4i-drm 1.0.0 20150629 for soc:display-engine on minor 0
+[    1.941325] [drm] kms: can't enable cloning when we probably wanted to.
+[    2.012702] Console: switching to colour frame buffer device 100x30
+[    2.051538] sun4i-drm soc:display-engine: fb0: sun4i-drmdrmfb frame buffer device
+[    2.060807] usb_phy_generic usb_phy_generic.0.auto: usb_phy_generic.0.auto supply vcc not found, using dummy regulator
+[    2.072909] musb-hdrc musb-hdrc.1.auto: MUSB HDRC host driver
+[    2.078976] musb-hdrc musb-hdrc.1.auto: new USB bus registered, assigned bus number 1
+[    2.089527] hub 1-0:1.0: USB hub found
+[    2.093459] hub 1-0:1.0: 1 port detected
+[    2.128212] hctosys: unable to open rtc device (rtc0)
+[    2.133863] cfg80211: Loading compiled-in X.509 certificates for regulatory database
+[    2.153957] cfg80211: Loaded X.509 cert 'sforshee: 00b28ddf47aef9cea7'
+[    2.160870] ALSA device list:
+[    2.163863]   #0: F1C100s Audio Codec
+[    2.169209] platform regulatory.0: Direct firmware load for regulatory.db failed with error -2
+[    2.177992] cfg80211: failed to load regulatory.db
+[    2.187510] random: crng init done
+[    2.193926] power_supply axp20x-battery: driver failed to report `status' property: -5
+[   23.179089] jffs2: notice: (1) jffs2_build_xattr_subsystem: complete building xattr subsystem, 0 of xdatum (0 unchecked, 0 orphan) and 0 of xref (0 dead, 0 orphan) found.
+[   23.211884] VFS: Mounted root (jffs2 filesystem) readonly on device 31:3.
+[   23.227055] devtmpfs: mounted
+[   23.235904] Freeing unused kernel memory: 1024K
+[   23.240551] Run /preinit as init process
+Unlocking /dev/mtd5 ...
+Erasing /dev/mtd5 ...
+
+Skipping bad block at 0x800000   [   27.002043] jffs2: notice: (61) jffs2_build_xattr_subsystem: complete building xattr subsystem, 0 of xdatum (0 unchecked, 0 orphan) and 0 of xref (0 dead, 0 orphan) found.
+[   27.123201] overlayfs: upper fs does not support tmpfile.
+Starting syslogd: OK
+Starting klogd: OK
+Running sysctl: OK
+Saving random seed: OK
+Starting system message bus: done
+Starting RNDIS: [   30.569413] using random self ethernet address
+[   30.573894] using random host ethernet address
+[   30.720507] usb0: HOST MAC 8a:66:3e:27:89:a6
+[   30.724941] usb0: MAC 9e:04:a8:a5:b4:0d
+OK
+Starting network: [   31.090870] configfs-gadget gadget: high-speed config #1: c
+OK
+Starting dropbear sshd: OK
+Starting dnsmasq: OK
+Starting RNDIS fallback: [   32.487119] vcc3v0: disabling
+[   32.490126] vcc3v3: disabling
+[   32.493097] vcc5v0: disabling
+[   32.496196] usb0_vbus: disabling
+Stopping RNDIS: OK
+[   49.594651] using random self ethernet address
+[   49.599266] using random host ethernet address
+[   49.605105] usb0: HOST MAC e2:00:12:55:da:d1
+[   49.609697] usb0: MAC 22:7b:36:58:22:8e
+[   49.613639] using random self ethernet address
+[   49.618198] using random host ethernet address
+[   49.622824] g_ether gadget: Ethernet Gadget, version: Memorial Day 2008
+[   49.629557] g_ether gadget: g_ether ready
+OK
+Starting Bluetooth Driver: [   50.037409] g_ether gadget: high-speed config #1: CDC Ethernet (ECM)
+[   51.008962] Bluetooth: HCI UART driver ver 2.3
+[   51.013438] Bluetooth: HCI UART protocol H4 registered
+[   51.019262] Bluetooth: HCI UART protocol Broadcom registered
+[   51.030678] hci_uart_bcm serial0-0: serial0-0 supply vbat not found, using dummy regulator
+[   51.039300] hci_uart_bcm serial0-0: serial0-0 supply vddio not found, using dummy regulator
+OK
+Starting Application: [   51.380122] overlayfs: upper fs does not support tmpfile.
+[   51.451278] Bluetooth: hci0: BCM: chip id 63
+[   51.458628] Bluetooth: hci0: BCM: features 0x07
+[   51.486950] Bluetooth: hci0: BCM20702A
+[   51.490757] Bluetooth: hci0: BCM20702A1 (001.002.014) build 0000
+[   51.497154] bluetooth hci0: Direct firmware load for brcm/BCM20702A1.hcd failed with error -2
+[   51.505790] Bluetooth: hci0: BCM: Patch brcm/BCM20702A1.hcd not found
+OK
+
+Welcome to Hatlab BADGE200
+badge200 login: 
+U-Boot SPL 2020.07 (Nov 13 2020 - 15:01:11 +0800)
+DRAM: 64 MiB
+Trying to boot from MMC1
+Card did not respond to voltage select!
+spl: mmc init failed with error: -95
+Trying to boot from MMC2
+Card did not respond to voltage select!
+spl: mmc init failed with error: -95
+Trying to boot from sunxi SPI
+SPI-NAND: GigaDevice GD5F1GQ4UAxxG
+SPI-NAND: U-Boot address: 53248
+
+
+U-Boot 2020.07 (Nov 13 2020 - 15:01:11 +0800) Allwinner Technology
+
+CPU:   Allwinner F Series (SUNIV)
+Model: Allwinner F1C100s Generic Device
+DRAM:  64 MiB
+MMC:   mmc@1c0f000: 0, mmc@1c10000: 1
+Setting up a 800x480 lcd console (overscan 0x0)
+In:    serial
+Out:   vga
+Err:   vga
+Allwinner mUSB OTG (Peripheral)
+Hit any key to stop autoboot:  0 
+Card did not respond to voltage select!
+Card did not respond to voltage select!
+unrecognized JEDEC id bytes: ff, c8, f1
+Failed to initialize SPI flash at 0:0 (error -2)
+List of MTD devices:
+* spi-nand0
+  - device: spi-nand@1
+  - parent: spi@1c05000
+  - driver: spi_nand
+  - type: NAND flash
+  - block size: 0x20000 bytes
+  - min I/O: 0x800 bytes
+  - OOB size: 64 bytes
+  - OOB available: 31 bytes
+  - 0x000000000000-0x000008000000 : "spi-nand0"
+=========================
+Boot Device: spi
+Boot Slot 0: empty
+Boot Slot 1: spi-nand
+=========================
+DFU waiting on SPI-NAND...
+musb-hdrc: peripheral reset irq lost!
+Booting from SPI-NAND...
+Reading 16384 byte(s) (8 page(s)) at offset 0x00080000
+Reading 7340032 byte(s) (3584 page(s)) at offset 0x00100000
+## Flattened Device Tree blob at 80700000
+   Booting using the fdt blob at 0x80700000
+   Loading Device Tree to 816f9000, end 816ffd7a ... OK
+Cannot setup simplefb: node not found
+
+Starting kernel ...
+
+[    0.000000] Booting Linux on physical CPU 0x0
+[    0.000000] Linux version 5.4.75 (aodzip@ThinkPad-X1) (gcc version 8.4.0 (Buildroot -g99ab117-dirty)) #1 Fri Nov 13 16:47:42 CST 2020
+[    0.000000] CPU: ARM926EJ-S [41069265] revision 5 (ARMv5TEJ), cr=0005317f
+[    0.000000] CPU: VIVT data cache, VIVT instruction cache
+[    0.000000] OF: fdt: Machine model: HatLab BADGE200
+[    0.000000] Memory policy: Data cache writeback
+[    0.000000] cma: Reserved 16 MiB at 0x83000000
+[    0.000000] Built 1 zonelists, mobility grouping on.  Total pages: 16256
+[    0.000000] Kernel command line: console=ttyS0,115200 earlyprintk rootwait init=/preinit consoleblank=0 net.ifnames=0 biosdevname=0 rootfstype=jffs2 root=/dev/mtdblock3 overlayfsdev=/dev/mtdblock5
+[    0.000000] Dentry cache hash table entries: 8192 (order: 3, 32768 bytes, linear)
+[    0.000000] Inode-cache hash table entries: 4096 (order: 2, 16384 bytes, linear)
+[    0.000000] mem auto-init: stack:off, heap alloc:off, heap free:off
+[    0.000000] Memory: 37700K/65536K available (7168K kernel code, 260K rwdata, 1744K rodata, 1024K init, 226K bss, 11452K reserved, 16384K cma-reserved)
+[    0.000000] SLUB: HWalign=32, Order=0-3, MinObjects=0, CPUs=1, Nodes=1
+[    0.000000] NR_IRQS: 16, nr_irqs: 16, preallocated irqs: 16
+[    0.000000] random: get_random_bytes called from start_kernel+0x254/0x444 with crng_init=0
+[    0.000049] sched_clock: 32 bits at 24MHz, resolution 41ns, wraps every 89478484971ns
+[    0.000140] clocksource: timer: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 79635851949 ns
+[    0.000932] Console: colour dummy device 80x30
+[    0.001041] Calibrating delay loop... 203.16 BogoMIPS (lpj=1015808)
+[    0.070262] pid_max: default: 32768 minimum: 301
+[    0.070799] Mount-cache hash table entries: 1024 (order: 0, 4096 bytes, linear)
+[    0.070846] Mountpoint-cache hash table entries: 1024 (order: 0, 4096 bytes, linear)
+[    0.072778] CPU: Testing write buffer coherency: ok
+[    0.074911] Setting up static identity map for 0x80100000 - 0x80100058
+[    0.076086] devtmpfs: initialized
+[    0.087986] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604462750000 ns
+[    0.088049] futex hash table entries: 256 (order: -1, 3072 bytes, linear)
+[    0.092345] pinctrl core: initialized pinctrl subsystem
+[    0.094883] NET: Registered protocol family 16
+[    0.098772] DMA: preallocated 256 KiB pool for atomic coherent allocations
+[    0.101261] cpuidle: using governor menu
+[    0.148214] SCSI subsystem initialized
+[    0.148635] usbcore: registered new interface driver usbfs
+[    0.148828] usbcore: registered new interface driver hub
+[    0.149016] usbcore: registered new device driver usb
+[    0.149486] mc: Linux media interface: v0.10
+[    0.149589] videodev: Linux video capture interface: v2.00
+[    0.149689] pps_core: LinuxPPS API ver. 1 registered
+[    0.149707] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+[    0.149788] PTP clock support registered
+[    0.150907] ion_parse_dt_heap_common: id 4 type 4 name cma align 1000
+[    0.152162] Advanced Linux Sound Architecture Driver Initialized.
+[    0.153515] Bluetooth: Core ver 2.22
+[    0.153724] NET: Registered protocol family 31
+[    0.153749] Bluetooth: HCI device and connection manager initialized
+[    0.153795] Bluetooth: HCI socket layer initialized
+[    0.153820] Bluetooth: L2CAP socket layer initialized
+[    0.153886] Bluetooth: SCO socket layer initialized
+[    0.155170] clocksource: Switched to clocksource timer
+[    0.186734] thermal_sys: Registered thermal governor 'step_wise'
+[    0.187452] NET: Registered protocol family 2
+[    0.189005] tcp_listen_portaddr_hash hash table entries: 512 (order: 0, 4096 bytes, linear)
+[    0.189091] TCP established hash table entries: 1024 (order: 0, 4096 bytes, linear)
+[    0.189149] TCP bind hash table entries: 1024 (order: 0, 4096 bytes, linear)
+[    0.189197] TCP: Hash tables configured (established 1024 bind 1024)
+[    0.189520] UDP hash table entries: 256 (order: 0, 4096 bytes, linear)
+[    0.189582] UDP-Lite hash table entries: 256 (order: 0, 4096 bytes, linear)
+[    0.190133] NET: Registered protocol family 1
+[    0.193019] NetWinder Floating Point Emulator V0.97 (double precision)
+[    0.194908] Initialise system trusted keyrings
+[    0.195621] workingset: timestamp_bits=30 max_order=14 bucket_order=0
+[    0.217406] squashfs: version 4.0 (2009/01/31) Phillip Lougher
+[    0.218034] jffs2: version 2.2. (NAND) (SUMMARY)  © 2001-2006 Red Hat, Inc.
+[    0.332114] Key type asymmetric registered
+[    0.332152] Asymmetric key parser 'x509' registered
+[    0.332325] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 247)
+[    0.332349] io scheduler mq-deadline registered
+[    0.332367] io scheduler kyber registered
+[    0.335047] sun4i-usb-phy 1c13400.phy: Couldn't request ID GPIO
+[    0.347028] suniv-f1c100s-pinctrl 1c20800.pinctrl: initialized sunXi PIO driver
+[    0.371964] Serial: 8250/16550 driver, 8 ports, IRQ sharing disabled
+[    0.381197] suniv-f1c100s-pinctrl 1c20800.pinctrl: 1c20800.pinctrl supply vcc-pe not found, using dummy regulator
+[    0.382638] printk: console [ttyS0] disabled
+[    0.402973] 1c25000.serial: ttyS0 at MMIO 0x1c25000 (irq = 27, base_baud = 6250000) is a 16550A
+[    0.872894] printk: console [ttyS0] enabled
+[    0.878823] suniv-f1c100s-pinctrl 1c20800.pinctrl: 1c20800.pinctrl supply vcc-pa not found, using dummy regulator
+[    0.910785] 1c25400.serial: ttyS1 at MMIO 0x1c25400 (irq = 28, base_baud = 6250000) is a 16550A
+[    0.920159] serial serial0: tty port ttyS1 registered
+[    0.930356] suniv-f1c100s-pinctrl 1c20800.pinctrl: 1c20800.pinctrl supply vcc-pd not found, using dummy regulator
+[    0.952052] panel-simple panel: panel supply power not found, using dummy regulator
+[    0.961691] SCSI Media Changer driver v0.25 
+[    0.967622] suniv-f1c100s-pinctrl 1c20800.pinctrl: 1c20800.pinctrl supply vcc-pc not found, using dummy regulator
+[    0.980498] spi-nand spi0.0: GigaDevice SPI NAND was found.
+[    0.986204] spi-nand spi0.0: 128 MiB, block size: 128 KiB, page size: 2048, OOB size: 64
+[    0.995885] 6 fixed-partitions partitions found on MTD device spi0.0
+[    1.002246] Creating 6 MTD partitions on "spi0.0":
+[    1.007163] 0x000000000000-0x000000080000 : "u-boot"
+[    1.018078] 0x000000080000-0x0000000a0000 : "dtb"
+[    1.027249] 0x000000100000-0x000000800000 : "kernel"
+[    1.035093] random: fast init done
+[    1.065534] 0x000000800000-0x000004800000 : "rom"
+[    1.307612] 0x000004800000-0x000005800000 : "extra"
+[    1.374656] 0x000005800000-0x000007800000 : "overlay"
+[    1.500819] ehci_hcd: USB 2.0 'Enhanced' Host Controller (EHCI) Driver
+[    1.507472] ehci-platform: EHCI generic platform driver
+[    1.513128] ohci_hcd: USB 1.1 'Open' Host Controller (OHCI) Driver
+[    1.519437] ohci-platform: OHCI generic platform driver
+[    1.525280] usbcore: registered new interface driver usb-storage
+[    1.533212] i2c /dev entries driver
+[    1.537488] suniv-f1c100s-pinctrl 1c20800.pinctrl: 1c20800.pinctrl supply vcc-pd not found, using dummy regulator
+[    1.557262] aw9523b_gpio 0-005b: with id 0x23 registered.
+[    1.563575] axp20x-i2c 0-0034: AXP20x variant AXP199 found
+[    1.586687] input: axp20x-pek as /devices/platform/soc/1c27000.i2c/i2c-0/0-0034/axp199-pek/input/input0
+[    1.600742] axp20x-i2c 0-0034: AXP20X driver loaded
+[    1.607527] suniv-f1c100s-pinctrl 1c20800.pinctrl: pin PE0 already requested by 1c25000.serial; cannot claim for 1cb0000.csi
+[    1.618856] suniv-f1c100s-pinctrl 1c20800.pinctrl: pin-128 (1cb0000.csi) status -22
+[    1.626571] suniv-f1c100s-pinctrl 1c20800.pinctrl: could not request pin 128 (PE0) from group PE0  on device 1c20800.pinctrl
+[    1.637799] sun4i-csi 1cb0000.csi: Error applying setting, reverse things back
+[    1.645057] sun4i-csi: probe of 1cb0000.csi failed with error -22
+[    1.651835] axp20x-usb-power-supply axp20x-usb-power-supply: DMA mask not set
+[    1.660634] axp20x-battery-power-supply axp20x-battery-power-supply: DMA mask not set
+[    1.669190] axp20x-ac-power-supply axp20x-ac-power-supply: DMA mask not set
+[    1.677754] sunxi-wdt 1c20ca0.watchdog: Watchdog enabled (timeout=16 sec, nowayout=0)
+[    1.687894] suniv-f1c100s-pinctrl 1c20800.pinctrl: 1c20800.pinctrl supply vcc-pf not found, using dummy regulator
+[    1.725872] sunxi-mmc 1c0f000.mmc: initialized, max. request size: 16384 KB
+[    1.735545] usbcore: registered new interface driver usbhid
+[    1.741118] usbhid: USB HID core driver
+[    1.745381] sunxi-cedar 1c0e000.video-codec: sunxi cedar version 0.01alpha
+[    1.752591] sunxi-cedar 1c0e000.video-codec: cedar-ve the get irq is 20
+[    1.761427] axp20x-adc axp20x-adc: DMA mask not set
+[    1.773479] debugfs: Directory '1c23c00.codec' with parent 'F1C100s Audio Codec' already present!
+[    1.787474] sun4i-codec 1c23c00.codec: Codec <-> 1c23c00.codec mapping ok
+[    1.803447] NET: Registered protocol family 17
+[    1.808457] Bluetooth: RFCOMM TTY layer initialized
+[    1.813421] Bluetooth: RFCOMM socket layer initialized
+[    1.818705] Bluetooth: RFCOMM ver 1.11
+[    1.822511] Bluetooth: BNEP (Ethernet Emulation) ver 1.3
+[    1.827893] Bluetooth: BNEP filters: protocol multicast
+[    1.833141] Bluetooth: BNEP socket layer initialized
+[    1.838156] Bluetooth: HIDP (Human Interface Emulation) ver 1.2
+[    1.844085] Bluetooth: HIDP socket layer initialized
+[    1.849146] Key type dns_resolver registered
+[    1.854839] Loading compiled-in X.509 certificates
+[    1.880584] sun4i-drm soc:display-engine: bound 1e00000.display-frontend (ops 0xc0839e98)
+[    1.889651] sun4i-drm soc:display-engine: bound 1e60000.display-backend (ops 0xc08396dc)
+[    1.899253] sun4i-drm soc:display-engine: bound 1c0c000.lcd-controller (ops 0xc083827c)
+[    1.907854] sun4i-drm soc:display-engine: bound 1c0a000.tv-encoder (ops 0xc0838f9c)
+[    1.915635] [drm] Supports vblank timestamp caching Rev 2 (21.10.2013).
+[    1.922239] [drm] No driver support for vblank timestamp query.
+[    1.929853] [drm] Initialized sun4i-drm 1.0.0 20150629 for soc:display-engine on minor 0
+[    1.938938] [drm] kms: can't enable cloning when we probably wanted to.
+[    2.010293] Console: switching to colour frame buffer device 100x30
+[    2.049173] sun4i-drm soc:display-engine: fb0: sun4i-drmdrmfb frame buffer device
+[    2.058429] usb_phy_generic usb_phy_generic.0.auto: usb_phy_generic.0.auto supply vcc not found, using dummy regulator
+[    2.070530] musb-hdrc musb-hdrc.1.auto: MUSB HDRC host driver
+[    2.076586] musb-hdrc musb-hdrc.1.auto: new USB bus registered, assigned bus number 1
+[    2.087169] hub 1-0:1.0: USB hub found
+[    2.091102] hub 1-0:1.0: 1 port detected
+[    2.133420] hctosys: unable to open rtc device (rtc0)
+[    2.139291] cfg80211: Loading compiled-in X.509 certificates for regulatory database
+[    2.160286] cfg80211: Loaded X.509 cert 'sforshee: 00b28ddf47aef9cea7'
+[    2.167207] ALSA device list:
+[    2.170258]   #0: F1C100s Audio Codec
+[    2.174489] platform regulatory.0: Direct firmware load for regulatory.db failed with error -2
+[    2.183217] cfg80211: failed to load regulatory.db
+[    2.188715] random: crng init done
+[    2.194784] power_supply axp20x-battery: driver failed to report `status' property: -5
+[   23.190322] jffs2: notice: (1) jffs2_build_xattr_subsystem: complete building xattr subsystem, 0 of xdatum (0 unchecked, 0 orphan) and 0 of xref (0 dead, 0 orphan) found.
+[   23.222995] VFS: Mounted root (jffs2 filesystem) readonly on device 31:3.
+[   23.238202] devtmpfs: mounted
+[   23.247738] Freeing unused kernel memory: 1024K
+[   23.252378] Run /preinit as init process
+Unlocking /dev/mtd5 ...
+Erasing /dev/mtd5 ...
+
+Skipping bad block at 0x800000   [   27.000967] jffs2: notice: (61) jffs2_build_xattr_subsystem: complete building xattr subsystem, 0 of xdatum (0 unchecked, 0 orphan) and 0 of xref (0 dead, 0 orphan) found.
+[   27.122232] overlayfs: upper fs does not support tmpfile.
+Starting syslogd: OK
+Starting klogd: OK
+Running sysctl: OK
+Saving random seed: OK
+Starting system message bus: done
+Starting RNDIS: [   30.557631] using random self ethernet address
+[   30.562110] using random host ethernet address
+[   30.707122] usb0: HOST MAC 22:9d:16:24:29:7a
+[   30.711560] usb0: MAC 06:f4:e1:bc:78:52
+OK
+Starting network: OK
+[   31.134047] configfs-gadget gadget: high-speed config #1: c
+Starting dropbear sshd: OK
+Starting dnsmasq: OK
+Starting RNDIS fallback: [   32.488015] vcc3v0: disabling
+[   32.491028] vcc3v3: disabling
+[   32.493998] vcc5v0: disabling
+[   32.497096] usb0_vbus: disabling
+Stopping RNDIS: OK
+[   49.615809] using random self ethernet address
+[   49.620285] using random host ethernet address
+[   49.626315] usb0: HOST MAC b2:a7:4d:69:6e:ae
+[   49.630745] usb0: MAC ce:b4:78:c5:86:76
+[   49.634678] using random self ethernet address
+[   49.639258] using random host ethernet address
+[   49.643883] g_ether gadget: Ethernet Gadget, version: Memorial Day 2008
+[   49.650591] g_ether gadget: g_ether ready
+OK
+Starting Bluetooth Driver: [   50.078311] g_ether gadget: high-speed config #1: CDC Ethernet (ECM)
+[   51.036287] Bluetooth: HCI UART driver ver 2.3
+[   51.040762] Bluetooth: HCI UART protocol H4 registered
+[   51.046601] Bluetooth: HCI UART protocol Broadcom registered
+[   51.057825] hci_uart_bcm serial0-0: serial0-0 supply vbat not found, using dummy regulator
+[   51.066496] hci_uart_bcm serial0-0: serial0-0 supply vddio not found, using dummy regulator
+OK
+Starting Application: [   51.425018] overlayfs: upper fs does not support tmpfile.
+[   51.500803] Bluetooth: hci0: BCM: chip id 63
+[   51.508855] Bluetooth: hci0: BCM: features 0x07
+[   51.537055] Bluetooth: hci0: BCM20702A
+[   51.540862] Bluetooth: hci0: BCM20702A1 (001.002.014) build 0000
+[   51.547245] bluetooth hci0: Direct firmware load for brcm/BCM20702A1.hcd failed with error -2
+[   51.555875] Bluetooth: hci0: BCM: Patch brcm/BCM20702A1.hcd not found
+OK
+
+Welcome to Hatlab BADGE200
+badge200 login: [   65.232802] g_ether gadget: high-speed config #1: CDC Ethernet (ECM)
+
+U-Boot SPL 2020.07 (Nov 13 2020 - 15:01:11 +0800)
+DRAM: 64 MiB
+Trying to boot from MMC1
+Card did not respond to voltage select!
+spl: mmc init failed with error: -95
+Trying to boot from MMC2
+Card did not respond to voltage select!
+spl: mmc init failed with error: -95
+Trying to boot from sunxi SPI
+SPI-NAND: GigaDevice GD5F1GQ4UAxxG
+SPI-NAND: U-Boot address: 53248
+
+
+U-Boot 2020.07 (Nov 13 2020 - 15:01:11 +0800) Allwinner Technology
+
+CPU:   Allwinner F Series (SUNIV)
+Model: Allwinner F1C100s Generic Device
+DRAM:  64 MiB
+MMC:   mmc@1c0f000: 0, mmc@1c10000: 1
+Setting up a 800x480 lcd console (overscan 0x0)
+In:    serial
+Out:   vga
+Err:   vga
+Allwinner mUSB OTG (Peripheral)
+Hit any key to stop autoboot:  0 
+Card did not respond to voltage select!
+Card did not respond to voltage select!
+unrecognized JEDEC id bytes: ff, c8, f1
+Failed to initialize SPI flash at 0:0 (error -2)
+List of MTD devices:
+* spi-nand0
+  - device: spi-nand@1
+  - parent: spi@1c05000
+  - driver: spi_nand
+  - type: NAND flash
+  - block size: 0x20000 bytes
+  - min I/O: 0x800 bytes
+  - OOB size: 64 bytes
+  - OOB available: 31 bytes
+  - 0x000000000000-0x000008000000 : "spi-nand0"
+=========================
+Boot Device: spi
+Boot Slot 0: empty
+Boot Slot 1: spi-nand
+=========================
+DFU waiting on SPI-NAND...
+musb-hdrc: peripheral reset irq lost!
+Booting from SPI-NAND...
+Reading 16384 byte(s) (8 page(s)) at offset 0x00080000
+Reading 7340032 byte(s) (3584 page(s)) at offset 0x00100000
+## Flattened Device Tree blob at 80700000
+   Booting using the fdt blob at 0x80700000
+   Loading Device Tree to 816f9000, end 816ffd7a ... OK
+Cannot setup simplefb: node not found
+
+Starting kernel ...
+
+[    0.000000] Booting Linux on physical CPU 0x0
+[    0.000000] Linux version 5.4.75 (aodzip@ThinkPad-X1) (gcc version 8.4.0 (Buildroot -g99ab117-dirty)) #1 Fri Nov 13 16:47:42 CST 2020
+[    0.000000] CPU: ARM926EJ-S [41069265] revision 5 (ARMv5TEJ), cr=0005317f
+[    0.000000] CPU: VIVT data cache, VIVT instruction cache
+[    0.000000] OF: fdt: Machine model: HatLab BADGE200
+[    0.000000] Memory policy: Data cache writeback
+[    0.000000] cma: Reserved 16 MiB at 0x83000000
+[    0.000000] Built 1 zonelists, mobility grouping on.  Total pages: 16256
+[    0.000000] Kernel command line: console=ttyS0,115200 earlyprintk rootwait init=/preinit consoleblank=0 net.ifnames=0 biosdevname=0 rootfstype=jffs2 root=/dev/mtdblock3 overlayfsdev=/dev/mtdblock5
+[    0.000000] Dentry cache hash table entries: 8192 (order: 3, 32768 bytes, linear)
+[    0.000000] Inode-cache hash table entries: 4096 (order: 2, 16384 bytes, linear)
+[    0.000000] mem auto-init: stack:off, heap alloc:off, heap free:off
+[    0.000000] Memory: 37700K/65536K available (7168K kernel code, 260K rwdata, 1744K rodata, 1024K init, 226K bss, 11452K reserved, 16384K cma-reserved)
+[    0.000000] SLUB: HWalign=32, Order=0-3, MinObjects=0, CPUs=1, Nodes=1
+[    0.000000] NR_IRQS: 16, nr_irqs: 16, preallocated irqs: 16
+[    0.000000] random: get_random_bytes called from start_kernel+0x254/0x444 with crng_init=0
+[    0.000049] sched_clock: 32 bits at 24MHz, resolution 41ns, wraps every 89478484971ns
+[    0.000139] clocksource: timer: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 79635851949 ns
+[    0.000935] Console: colour dummy device 80x30
+[    0.001038] Calibrating delay loop... 203.16 BogoMIPS (lpj=1015808)
+[    0.070263] pid_max: default: 32768 minimum: 301
+[    0.070799] Mount-cache hash table entries: 1024 (order: 0, 4096 bytes, linear)
+[    0.070849] Mountpoint-cache hash table entries: 1024 (order: 0, 4096 bytes, linear)
+[    0.072788] CPU: Testing write buffer coherency: ok
+[    0.074914] Setting up static identity map for 0x80100000 - 0x80100058
+[    0.076078] devtmpfs: initialized
+[    0.087995] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604462750000 ns
+[    0.088060] futex hash table entries: 256 (order: -1, 3072 bytes, linear)
+[    0.092404] pinctrl core: initialized pinctrl subsystem
+[    0.094925] NET: Registered protocol family 16
+[    0.098825] DMA: preallocated 256 KiB pool for atomic coherent allocations
+[    0.101342] cpuidle: using governor menu
+[    0.148298] SCSI subsystem initialized
+[    0.148738] usbcore: registered new interface driver usbfs
+[    0.148909] usbcore: registered new interface driver hub
+[    0.149088] usbcore: registered new device driver usb
+[    0.149563] mc: Linux media interface: v0.10
+[    0.149663] videodev: Linux video capture interface: v2.00
+[    0.149757] pps_core: LinuxPPS API ver. 1 registered
+[    0.149774] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+[    0.149852] PTP clock support registered
+[    0.150999] ion_parse_dt_heap_common: id 4 type 4 name cma align 1000
+[    0.152257] Advanced Linux Sound Architecture Driver Initialized.
+[    0.153634] Bluetooth: Core ver 2.22
+[    0.153845] NET: Registered protocol family 31
+[    0.153868] Bluetooth: HCI device and connection manager initialized
+[    0.153915] Bluetooth: HCI socket layer initialized
+[    0.153942] Bluetooth: L2CAP socket layer initialized
+[    0.154005] Bluetooth: SCO socket layer initialized
+[    0.155291] clocksource: Switched to clocksource timer
+[    0.186762] thermal_sys: Registered thermal governor 'step_wise'
+[    0.187499] NET: Registered protocol family 2
+[    0.189073] tcp_listen_portaddr_hash hash table entries: 512 (order: 0, 4096 bytes, linear)
+[    0.189162] TCP established hash table entries: 1024 (order: 0, 4096 bytes, linear)
+[    0.189220] TCP bind hash table entries: 1024 (order: 0, 4096 bytes, linear)
+[    0.189268] TCP: Hash tables configured (established 1024 bind 1024)
+[    0.189582] UDP hash table entries: 256 (order: 0, 4096 bytes, linear)
+[    0.189653] UDP-Lite hash table entries: 256 (order: 0, 4096 bytes, linear)
+[    0.190221] NET: Registered protocol family 1
+[    0.193083] NetWinder Floating Point Emulator V0.97 (double precision)
+[    0.194964] Initialise system trusted keyrings
+[    0.195684] workingset: timestamp_bits=30 max_order=14 bucket_order=0
+[    0.217470] squashfs: version 4.0 (2009/01/31) Phillip Lougher
+[    0.218097] jffs2: version 2.2. (NAND) (SUMMARY)  © 2001-2006 Red Hat, Inc.
+[    0.332392] Key type asymmetric registered
+[    0.332430] Asymmetric key parser 'x509' registered
+[    0.332602] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 247)
+[    0.332628] io scheduler mq-deadline registered
+[    0.332646] io scheduler kyber registered
+[    0.335487] sun4i-usb-phy 1c13400.phy: Couldn't request ID GPIO
+[    0.347339] suniv-f1c100s-pinctrl 1c20800.pinctrl: initialized sunXi PIO driver
+[    0.372340] Serial: 8250/16550 driver, 8 ports, IRQ sharing disabled
+[    0.381575] suniv-f1c100s-pinctrl 1c20800.pinctrl: 1c20800.pinctrl supply vcc-pe not found, using dummy regulator
+[    0.382997] printk: console [ttyS0] disabled
+[    0.403329] 1c25000.serial: ttyS0 at MMIO 0x1c25000 (irq = 27, base_baud = 6250000) is a 16550A
+[    0.873243] printk: console [ttyS0] enabled
+[    0.879170] suniv-f1c100s-pinctrl 1c20800.pinctrl: 1c20800.pinctrl supply vcc-pa not found, using dummy regulator
+[    0.911149] 1c25400.serial: ttyS1 at MMIO 0x1c25400 (irq = 28, base_baud = 6250000) is a 16550A
+[    0.920526] serial serial0: tty port ttyS1 registered
+[    0.930754] suniv-f1c100s-pinctrl 1c20800.pinctrl: 1c20800.pinctrl supply vcc-pd not found, using dummy regulator
+[    0.952431] panel-simple panel: panel supply power not found, using dummy regulator
+[    0.962090] SCSI Media Changer driver v0.25 
+[    0.968020] suniv-f1c100s-pinctrl 1c20800.pinctrl: 1c20800.pinctrl supply vcc-pc not found, using dummy regulator
+[    0.980898] spi-nand spi0.0: GigaDevice SPI NAND was found.
+[    0.986603] spi-nand spi0.0: 128 MiB, block size: 128 KiB, page size: 2048, OOB size: 64
+[    0.996256] 6 fixed-partitions partitions found on MTD device spi0.0
+[    1.002616] Creating 6 MTD partitions on "spi0.0":
+[    1.007537] 0x000000000000-0x000000080000 : "u-boot"
+[    1.018441] 0x000000080000-0x0000000a0000 : "dtb"
+[    1.027599] 0x000000100000-0x000000800000 : "kernel"
+[    1.035568] random: fast init done
+[    1.065973] 0x000000800000-0x000004800000 : "rom"
+[    1.307941] 0x000004800000-0x000005800000 : "extra"
+[    1.375043] 0x000005800000-0x000007800000 : "overlay"
+[    1.501387] ehci_hcd: USB 2.0 'Enhanced' Host Controller (EHCI) Driver
+[    1.508040] ehci-platform: EHCI generic platform driver
+[    1.513696] ohci_hcd: USB 1.1 'Open' Host Controller (OHCI) Driver
+[    1.520006] ohci-platform: OHCI generic platform driver
+[    1.525822] usbcore: registered new interface driver usb-storage
+[    1.533727] i2c /dev entries driver
+[    1.538010] suniv-f1c100s-pinctrl 1c20800.pinctrl: 1c20800.pinctrl supply vcc-pd not found, using dummy regulator
+[    1.557757] aw9523b_gpio 0-005b: with id 0x23 registered.
+[    1.564055] axp20x-i2c 0-0034: AXP20x variant AXP199 found
+[    1.587179] input: axp20x-pek as /devices/platform/soc/1c27000.i2c/i2c-0/0-0034/axp199-pek/input/input0
+[    1.601225] axp20x-i2c 0-0034: AXP20X driver loaded
+[    1.608024] suniv-f1c100s-pinctrl 1c20800.pinctrl: pin PE0 already requested by 1c25000.serial; cannot claim for 1cb0000.csi
+[    1.619351] suniv-f1c100s-pinctrl 1c20800.pinctrl: pin-128 (1cb0000.csi) status -22
+[    1.627062] suniv-f1c100s-pinctrl 1c20800.pinctrl: could not request pin 128 (PE0) from group PE0  on device 1c20800.pinctrl
+[    1.638292] sun4i-csi 1cb0000.csi: Error applying setting, reverse things back
+[    1.645583] sun4i-csi: probe of 1cb0000.csi failed with error -22
+[    1.652307] axp20x-usb-power-supply axp20x-usb-power-supply: DMA mask not set
+[    1.661107] axp20x-battery-power-supply axp20x-battery-power-supply: DMA mask not set
+[    1.669662] axp20x-ac-power-supply axp20x-ac-power-supply: DMA mask not set
+[    1.678218] sunxi-wdt 1c20ca0.watchdog: Watchdog enabled (timeout=16 sec, nowayout=0)
+[    1.688373] suniv-f1c100s-pinctrl 1c20800.pinctrl: 1c20800.pinctrl supply vcc-pf not found, using dummy regulator
+[    1.726373] sunxi-mmc 1c0f000.mmc: initialized, max. request size: 16384 KB
+[    1.736053] usbcore: registered new interface driver usbhid
+[    1.741626] usbhid: USB HID core driver
+[    1.745888] sunxi-cedar 1c0e000.video-codec: sunxi cedar version 0.01alpha
+[    1.753098] sunxi-cedar 1c0e000.video-codec: cedar-ve the get irq is 20
+[    1.761951] axp20x-adc axp20x-adc: DMA mask not set
+[    1.774027] debugfs: Directory '1c23c00.codec' with parent 'F1C100s Audio Codec' already present!
+[    1.787996] sun4i-codec 1c23c00.codec: Codec <-> 1c23c00.codec mapping ok
+[    1.803987] NET: Registered protocol family 17
+[    1.809000] Bluetooth: RFCOMM TTY layer initialized
+[    1.813958] Bluetooth: RFCOMM socket layer initialized
+[    1.819240] Bluetooth: RFCOMM ver 1.11
+[    1.823048] Bluetooth: BNEP (Ethernet Emulation) ver 1.3
+[    1.828431] Bluetooth: BNEP filters: protocol multicast
+[    1.833674] Bluetooth: BNEP socket layer initialized
+[    1.838692] Bluetooth: HIDP (Human Interface Emulation) ver 1.2
+[    1.844621] Bluetooth: HIDP socket layer initialized
+[    1.849696] Key type dns_resolver registered
+[    1.855517] Loading compiled-in X.509 certificates
+[    1.881163] sun4i-drm soc:display-engine: bound 1e00000.display-frontend (ops 0xc0839e98)
+[    1.890228] sun4i-drm soc:display-engine: bound 1e60000.display-backend (ops 0xc08396dc)
+[    1.899824] sun4i-drm soc:display-engine: bound 1c0c000.lcd-controller (ops 0xc083827c)
+[    1.908414] sun4i-drm soc:display-engine: bound 1c0a000.tv-encoder (ops 0xc0838f9c)
+[    1.916193] [drm] Supports vblank timestamp caching Rev 2 (21.10.2013).
+[    1.922796] [drm] No driver support for vblank timestamp query.
+[    1.930401] [drm] Initialized sun4i-drm 1.0.0 20150629 for soc:display-engine on minor 0
+[    1.939493] [drm] kms: can't enable cloning when we probably wanted to.
+[    2.010850] Console: switching to colour frame buffer device 100x30
+[    2.049710] sun4i-drm soc:display-engine: fb0: sun4i-drmdrmfb frame buffer device
+[    2.058977] usb_phy_generic usb_phy_generic.0.auto: usb_phy_generic.0.auto supply vcc not found, using dummy regulator
+[    2.071076] musb-hdrc musb-hdrc.1.auto: MUSB HDRC host driver
+[    2.077125] musb-hdrc musb-hdrc.1.auto: new USB bus registered, assigned bus number 1
+[    2.087710] hub 1-0:1.0: USB hub found
+[    2.091637] hub 1-0:1.0: 1 port detected
+[    2.131274] hctosys: unable to open rtc device (rtc0)
+[    2.137134] cfg80211: Loading compiled-in X.509 certificates for regulatory database
+[    2.158916] cfg80211: Loaded X.509 cert 'sforshee: 00b28ddf47aef9cea7'
+[    2.165814] ALSA device list:
+[    2.168858]   #0: F1C100s Audio Codec
+[    2.173340] platform regulatory.0: Direct firmware load for regulatory.db failed with error -2
+[    2.182095] cfg80211: failed to load regulatory.db
+[    2.189411] random: crng init done
+[    2.194902] power_supply axp20x-battery: driver failed to report `status' property: -5
+[   23.198411] jffs2: notice: (1) jffs2_build_xattr_subsystem: complete building xattr subsystem, 0 of xdatum (0 unchecked, 0 orphan) and 0 of xref (0 dead, 0 orphan) found.
+[   23.231352] VFS: Mounted root (jffs2 filesystem) readonly on device 31:3.
+[   23.246596] devtmpfs: mounted
+[   23.256126] Freeing unused kernel memory: 1024K
+[   23.260772] Run /preinit as init process
+Unlocking /dev/mtd5 ...
+Erasing /dev/mtd5 ...
+
+Skipping bad block at 0x800000   [   27.024441] jffs2: notice: (61) jffs2_build_xattr_subsystem: complete building xattr subsystem, 0 of xdatum (0 unchecked, 0 orphan) and 0 of xref (0 dead, 0 orphan) found.
+[   27.146379] overlayfs: upper fs does not support tmpfile.
+Starting syslogd: OK
+Starting klogd: OK
+Running sysctl: OK
+Saving random seed: OK
+Starting system message bus: done
+Starting RNDIS: [   30.585242] using random self ethernet address
+[   30.589852] using random host ethernet address
+[   30.736444] usb0: HOST MAC 16:16:d6:33:f3:e6
+[   30.740877] usb0: MAC 0a:60:0c:ef:04:06
+OK
+Starting network: OK
+[   31.212104] configfs-gadget gadget: high-speed config #1: c
+Starting dropbear sshd: OK
+Starting dnsmasq: OK
+Starting RNDIS fallback: [   32.485499] vcc3v0: disabling
+[   32.488507] vcc3v3: disabling
+[   32.491477] vcc5v0: disabling
+[   32.494441] usb0_vbus: disabling
+Stopping RNDIS: OK
+[   49.674001] using random self ethernet address
+[   49.678633] using random host ethernet address
+[   49.684486] usb0: HOST MAC 1e:0b:e0:a6:d1:01
+[   49.689075] usb0: MAC 0e:aa:2f:c5:e5:98
+[   49.693015] using random self ethernet address
+[   49.697567] using random host ethernet address
+[   49.702187] g_ether gadget: Ethernet Gadget, version: Memorial Day 2008
+[   49.708899] g_ether gadget: g_ether ready
+OK
+Starting Bluetooth Driver: [   50.158885] g_ether gadget: high-speed config #1: CDC Ethernet (ECM)
+[   51.093589] Bluetooth: HCI UART driver ver 2.3
+[   51.098206] Bluetooth: HCI UART protocol H4 registered
+[   51.103880] Bluetooth: HCI UART protocol Broadcom registered
+[   51.115100] hci_uart_bcm serial0-0: serial0-0 supply vbat not found, using dummy regulator
+[   51.123730] hci_uart_bcm serial0-0: serial0-0 supply vddio not found, using dummy regulator
+OK
+Starting Application: [   51.482050] overlayfs: upper fs does not support tmpfile.
+[   51.551008] Bluetooth: hci0: BCM: chip id 63
+[   51.558388] Bluetooth: hci0: BCM: features 0x07
+[   51.586727] Bluetooth: hci0: BCM20702A
+[   51.590535] Bluetooth: hci0: BCM20702A1 (001.002.014) build 0000
+[   51.596941] bluetooth hci0: Direct firmware load for brcm/BCM20702A1.hcd failed with error -2
+[   51.605570] Bluetooth: hci0: BCM: Patch brcm/BCM20702A1.hcd not found
+OK
+
+Welcome to Hatlab BADGE200
+badge200 login: [   64.276331] g_ether gadget: high-speed config #1: CDC Ethernet (ECM)
