@@ -6,7 +6,7 @@ categories:
 tags: HITCTF mips
 ---
 
-> 比较简单的Pwn，其中的MIPS Pwn是人生中拿到的第一个Pwn的一血，全是4哥的功劳。
+> 更新中...比较简单的Pwn，其中的MIPS Pwn是人生中拿到的第一个Pwn的一血，全是4哥的功劳。
 
 总共五道题，做出来三道，题目全在这了：[pwn.zip](https://xuanxuanblingbling.github.io/assets/attachment/hitctf/sniff.pcap)
 
