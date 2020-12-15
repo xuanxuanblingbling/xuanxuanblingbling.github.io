@@ -6,7 +6,10 @@ categories:
 tags: 无线安全 HITCTF
 ---
 
-> 更新中...给出了非常长的01串，并告知这是用ubertooth抓到的原始数据，其中含有蓝牙的通信数据：[sniff.pcap](https://xuanxuanblingbling.github.io/assets/attachment/hitctf/sniff.pcap)
+> 给出了非常长的01串，并告知这是用ubertooth抓到的原始数据，其中含有蓝牙的广播报文，请解析报文。
+
+- 附件：[sniff.pcap](https://xuanxuanblingbling.github.io/assets/attachment/hitctf/sniff.pcap)
+- 提示flag格式如下：
 
 ```
 flag1=HITCTF2020{hex(payload).lower()}
