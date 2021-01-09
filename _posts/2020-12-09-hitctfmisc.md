@@ -81,3 +81,7 @@ crc      : 62c95d
 crc_check: 5dc962
 ```
 
+
+```
+HITCTF2020{humaninterfacedevice5dc962}
+```
