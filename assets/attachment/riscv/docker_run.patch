@@ -1,0 +1,12 @@
+diff -uprN favourite_architecture/docker-compose.yml favourite_architecture2/docker-compose.yml
+--- favourite_architecture/docker-compose.yml	2021-01-15 22:49:56.000000000 +0800
++++ favourite_architecture2/docker-compose.yml	2021-01-22 23:35:19.000000000 +0800
+@@ -8,7 +8,7 @@ services:
+             - ./xinetd:/etc/xinetd.d/xinetd:ro
+             - ./tmp:/tmp:ro
+         ports:
+-            - "60001:8888"
++            - "8888:8888"
+         expose:
+             - "8888"
+         pids_limit: 1024
