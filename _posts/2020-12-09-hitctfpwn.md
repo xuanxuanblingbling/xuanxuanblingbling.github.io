@@ -48,7 +48,7 @@ io.interactive()
 - [HITCTF_WP_pwn4_5](https://c0yo7e.github.io/2020/12/12/HITCTFF-WP-pwn4n4-5/)
 - [emocat/writeups: HITCTF-2020](https://github.com/emocat/writeups/tree/master/2020/HITCTF-2020)
 
-发现因为只关闭了标准输出和标准错误，所以还可以使用将输出重定向到标准错位来绕过。不过使用这种方法在pwntools中用process启动就会给EOF，用socat可以成功：
+发现因为只关闭了标准输出和标准错误，所以还可以使用将输出重定向到标准输入来绕过。不过使用这种方法在pwntools中用process启动就会给EOF，用socat可以成功：
 
 ```python
 ➜  socat tcp-l:1111,reuseaddr,fork exec:"./dagongren1"
