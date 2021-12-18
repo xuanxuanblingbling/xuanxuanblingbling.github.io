@@ -312,14 +312,23 @@ exp.py	gen.php  payload.bin  shellcode  shellcode.bin	shellcode.bin.tmp  shellco
 
 ![image](https://xuanxuanblingbling.github.io/assets/pic/byte/magic.png)
 
-另外如果直接使用题目二进制进行qemu调试可能会出现bus error的错误：
+反思一下，做出此题的确不难，比赛时一个是没认真看论文，还想另辟蹊径看看有多少纯字符的指令能用，本以为没多少，尝试用pwntools的disasm去爆破可用纯字符指令发现太多了，就彻底放弃了。后来赛后做题时还有个小插曲，同学抄shellcode时，将`szO6`抄成了`sz06`，debug了好久才发现，都是跳转，一前一后：
 
-- 赛后和朋友分析排错发现首先是pwndbg的锅
+```python
+>>> from pwn import *
+>>> context(arch='aarch64',os='linux')
+>>> disasm(b'szO6')
+'   0:   364f7a73        tbz     w19, #9, 0xffffffffffffef4c'
+>>> disasm(b'sz06')
+'   0:   36307a73        tbz     w19, #6, 0xf4c'
+```
+
+另外直接使用题目二进制进行qemu调试可能会出现bus error的错误，分析如下：
+
+- 分析排错发现首先是pwndbg的锅
 - 撤掉pwndbg后会由于非法访存死掉，此内存是mmap的空间
 - 分析可能是因为mmap的private或者由于文件大小不足导致操作系统没有真正分配内存
 - 但正常情况下应该会有缺页中断来处理此错误，所以猜测可能是qemu实现等问题
-
-还有个小插曲，同学抄shellcode时，将`szO6`抄成了`sz06`，debug了好久才发现...
 
 ## 一体
 
