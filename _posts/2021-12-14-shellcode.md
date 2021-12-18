@@ -42,7 +42,7 @@ This code is pre-processed by m4 which performs macro expansion
 
 ## 解决
 
-赛后王皓教我，其实不需要看懂什么m4，因为首先按照纯字符shellcode的一般原理，其就是由解码器和编码过的payload两部分组成，并且论文中给出了一个arm64裸机可打印helloworld的示例shellcode。所以如果论文方案中，解码器和payload是完全独立的，则可以复用示例shellcode中前面的解码部分，然后将linux用户态的 **execve("/bin/sh",0,0)** 的shellcode按论文方案编码，然后替换helloworld中的功能payload即可，所以关键变成了如何把这段示例shellcode拆分出来：
+赛后皓哥教我，其实不需要看懂什么m4，因为首先按照纯字符shellcode的一般原理，其就是由解码器和编码过的payload两部分组成，并且论文中给出了一个arm64裸机可打印helloworld的示例shellcode。所以如果论文方案中，解码器和payload是完全独立的，则可以复用示例shellcode中前面的解码部分，然后将linux用户态的 **execve("/bin/sh",0,0)** 的shellcode按论文方案编码，然后替换helloworld中的功能payload即可，所以关键变成了如何把这段示例shellcode拆分出来：
 
 ```c
 The following program prints “Hello world” when executed in QEMU (tested
