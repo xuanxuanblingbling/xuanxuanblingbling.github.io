@@ -315,6 +315,8 @@ exp.py	gen.php  payload.bin  shellcode  shellcode.bin	shellcode.bin.tmp  shellco
 - 分析可能是因为mmap的private或者由于文件大小不足导致操作系统没有真正分配内存
 - 但正常情况下应该会有缺页中断来处理此错误，所以猜测可能是qemu实现等问题
 
+还有个小插曲，同学抄shellcode时，将`szO6`抄成了`sz06`，debug了好久才发现...
+
 ## 一体
 
 原论文给出的代码不便于工具化，分析那段php其实就是个类似hex的编码，python完整工具实现如下：
