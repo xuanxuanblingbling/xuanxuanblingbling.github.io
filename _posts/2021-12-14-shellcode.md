@@ -308,6 +308,10 @@ $ ls
 exp.py	gen.php  payload.bin  shellcode  shellcode.bin	shellcode.bin.tmp  shellcode.txt
 ```
 
+让我们来看一下这神奇咒语的全貌吧，感受一下奇妙的计算机，我觉得这是值得的：
+
+![image](https://xuanxuanblingbling.github.io/assets/pic/byte/magic.png)
+
 另外如果直接使用题目二进制进行qemu调试可能会出现bus error的错误：
 
 - 赛后和朋友分析排错发现首先是pwndbg的锅
