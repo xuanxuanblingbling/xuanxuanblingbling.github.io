@@ -7,7 +7,7 @@ tags:
 
 > 赛后和王皓共同完成，目标为AArch64纯字符shellcode，认真看论文把编解码器抠出来即可。赛时没做出此题着实该反思。
 
-- 附件：[exsc.zip](https://xuanxuanblingbling.github.io/assets/attachment/bytectf/exsc.zip)
+附件：[exsc.zip](https://xuanxuanblingbling.github.io/assets/attachment/bytectf/exsc.zip)
 
 ## 困惑
 
@@ -351,6 +351,8 @@ f.close()
 ➜  qemu-aarch64 ./shellcode
 $ 
 ```
+
+其他WP:
 
 - [ByteCTF 2021 writeup（官方WP）](https://bytedance.feishu.cn/docs/doccntSbxsYPGEXw7wLP0TY73df#)
 - [ByteCTF 2021 Final Master of HTTPD && exsc 题解](https://eqqie.cn/index.php/archives/1888)
