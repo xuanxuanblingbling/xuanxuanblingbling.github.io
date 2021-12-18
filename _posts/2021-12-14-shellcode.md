@@ -177,7 +177,7 @@ NNDEHLMBBNLMJMOBNNNELEOBNNFENNOBPOPMHPMBNNCOKOJINPPCPPIANAPCAOJJNBPCAOJJJHAKHPMB
 
 ## 拆分
 
-然后就是从示例shellcode拆出来解码器，不知道为啥论文原文就是没给直接拆好的解码shellcode，是希望读者看一遍而不是拿来就用么？想要自己拆分，就得认真看看解码器的实现了，其实前面的m4就是替换汇编中的一些寄存器啥的，主要明白这段就行：
+然后就是从示例shellcode拆出来解码器，不知道为啥论文就是没给直接拆好的解码shellcode，是希望读者看一遍而不是拿来就用么？想要自己拆分，就得认真看解码器的实现了，其实前面的m4就是替换汇编中的一些寄存器啥的，主要明白这段就行：
 
 ```c
 /* S++ */
