@@ -72,6 +72,8 @@ szO6
 
 首先可以验证一下这个helloworld好不好使：
 
+> 感悟：安全真是魔法，这段简直就是咒语
+
 ```python
 import os
 shellcode = b'''
