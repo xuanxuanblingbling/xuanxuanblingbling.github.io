@@ -5,7 +5,7 @@ categories:
 tags: 
 ---
 
-> HITCON18的 ARM64/32 系统Pwn题，总共6关：EL0、EL1、EL2、S-EL0、S-EL1、EL3，目前打到第三关，最近要忙毕设，所以后三关得过几个月才能打完了。此题相关内容都在：[https://github.com/xuanxuanblingbling/SuperHexagon](https://github.com/xuanxuanblingbling/SuperHexagon)中，详解为[superhexagon.pdf](https://github.com/xuanxuanblingbling/SuperHexagon/blob/master/superhexagon.pdf)。
+> HITCON18的 ARM64/32 系统Pwn题，总共6关，目前打到第3关。最近要忙毕设，所以估计后三关得过几个月才能打完了。此题相关内容都在：[https://github.com/xuanxuanblingbling/SuperHexagon](https://github.com/xuanxuanblingbling/SuperHexagon)中，详解为[superhexagon.pdf](https://github.com/xuanxuanblingbling/SuperHexagon/blob/master/superhexagon.pdf)。
 
 前三关完整exp:
 
