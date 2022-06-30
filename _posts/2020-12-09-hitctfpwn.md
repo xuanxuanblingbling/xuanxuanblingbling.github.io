@@ -12,7 +12,7 @@ tags: HITCTF mips
 
 ## dagongren1
 
-媳妇博客：[hitctf2020之dagognren1](https://blingblingxuanxuan.github.io/hitctf2020-dagongren1.html)
+媳妇博客：[hitctf2020之dagognren1](https://blingblingxuanxuan.github.io/2020/12/05/hitctf2020-dagongren1/)
 
 - 漏洞：main函数scanf栈溢出
 - 利用：栈迁移+shellcode反弹shell
