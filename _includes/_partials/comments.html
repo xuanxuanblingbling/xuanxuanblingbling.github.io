@@ -27,6 +27,9 @@
     {% elsif site.youyan_uid %}
       <div id="uyan_frame"></div>
     {% elsif site.livere_uid %}
+    <style>
+      #taboola-livere { display: none;}
+    </style>
       <div id="lv-container" data-id="city" data-uid="{{ site.livere_uid }}"></div>
     {% elsif site.changyan.appid and site.changyan.appkey %}
       <div id="SOHUCS"></div>
