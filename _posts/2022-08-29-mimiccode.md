@@ -1,5 +1,5 @@
 ---
-title: 强网杯 2022 final KoH MimicCode
+title: 强网杯 2022 Final KoH MimicCode
 categories:
 - CTF/Pwn
 tags: 
