@@ -7,7 +7,10 @@ tags:
 
 > 更新中...跨架构shellcode
 
+![image](https://xuanxuanblingbling.github.io/assets/pic/qwb/rank.png)
+
 附件：[MimicCode.tgz](https://xuanxuanblingbling.github.io/assets/attachment/qwb/MimicCode.tgz)
+
 
 ## 比赛版本
 
