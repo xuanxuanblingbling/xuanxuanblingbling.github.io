@@ -111,10 +111,10 @@ Stven_King：
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/step.png)
 
 
-<font color="#D44C47">【正序列化 ①】</font>【exp】：手动构造一个非直接调用bug类序列化的bundle，payload直接存在于bundle的mParcelledData中，因此bundle传递出去时的序列化不会触发bug类的正常序列化  
-<font color="#448361">【反序列化 ①】</font>【system_server】：彻底反序列化bundle，将解析所有mParcelledData，没有找到key为intent的元素，跳过对intent的目标检查  
-<font color="#D44C47">【正序列化 ②】</font>【system_server】：再次对bundle序列化，由于mParcelledData已经为空，所以将触发bug类的正常序列化，由于bug类，bundle将出现错位  
-<font color="#448361">【反序列化 ②】</font>【Settings】：反序列化bundle，因为bundle的错位，将解析出key为intent元素，则此恶意intent将被启动  
+<font color="#D44C47">【正序列化 ①】</font> a【exp】：手动构造一个非直接调用bug类序列化的bundle，payload直接存在于bundle的mParcelledData中，因此bundle传递出去时的序列化不会触发bug类的正常序列化  
+<font color="#448361">【反序列化 ①】</font> 【system_server】：彻底反序列化bundle，将解析所有mParcelledData，没有找到key为intent的元素，跳过对intent的目标检查  
+<font color="#D44C47">【正序列化 ②】</font> 【system_server】：再次对bundle序列化，由于mParcelledData已经为空，所以将触发bug类的正常序列化，由于bug类，bundle将出现错位  
+<font color="#448361">【反序列化 ②】</font> 【Settings】：反序列化bundle，因为bundle的错位，将解析出key为intent元素，则此恶意intent将被启动  
 
 
 ### 理解障碍：总计四次的序列化和反序列化
@@ -208,7 +208,7 @@ Stven_King：
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/attack3.png)
 
 
-例如对CVE-2017-13315的分析，即可遵循这三步：<font color="#448361">【反序列化（老数据）】</font>→【序列化（注入变化）】 → <font color="#D44C47">【反序列化（新数据）】</font>
+如分析CVE-2017-13315，即可遵循这三步：<font color="#448361">【反序列化（老数据）】</font>→【序列化（注入变化）】 → <font color="#D44C47">【反序列化（新数据）】</font>
 
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/attack4.png)
 
@@ -281,7 +281,7 @@ Stven_King：
 ### 模拟序列化与反序列化的过程
 
 
-按照上文推理出来的三步分析的点，对应图中 <font color="#448361">【反序列化（老数据）】</font>→【序列化（注入变化）】 → <font color="#D44C47">【反序列化（新数据）】</font>，所以所有关键步骤点都在system_server和Settings中，虽然可以按照第一篇[LaunchAnyWhere 漏洞现世](https://xuanxuanblingbling.github.io/ctf/android/2024/04/13/launchanywhere01/)中介绍的调试办法，单独调试system_server和Settings，进而观察序列化和反序列化过程。但对于调试exp的中不断对payload进行修改的过程来说，这种方法会耽误大量的时间，非常不合适。
+按照上文推理出来的三步分析的点，对应图中 <font color="#448361">【反序列化1)】</font>→【序列化2】 → <font color="#D44C47">【反序列化2】</font>，所以所有关键步骤点都在system_server和Settings中，虽然可以按照第一篇[LaunchAnyWhere 漏洞现世](https://xuanxuanblingbling.github.io/ctf/android/2024/04/13/launchanywhere01/)中介绍的调试办法，单独调试system_server和Settings，进而观察序列化和反序列化过程。但对于调试exp的中不断对payload进行修改的过程来说，这种方法会耽误大量的时间，非常不合适。
 
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/step.png)
 
