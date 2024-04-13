@@ -52,7 +52,7 @@ tags:
 - [无法利用](#%E6%97%A0%E6%B3%95%E5%88%A9%E7%94%A8)
   * [CVE-2018-9471：多出4个字节，但超短的生命周期](#cve-2018-9471%E5%A4%9A%E5%87%BA4%E4%B8%AA%E5%AD%97%E8%8A%82%E4%BD%86%E8%B6%85%E7%9F%AD%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F)
   * [CVE-2021-0970：多出4个字节，但无法通过 parcel.dataAvail 检查](#cve-2021-0970%E5%A4%9A%E5%87%BA4%E4%B8%AA%E5%AD%97%E8%8A%82%E4%BD%86%E6%97%A0%E6%B3%95%E9%80%9A%E8%BF%87-parceldataavail-%E6%A3%80%E6%9F%A5)
-  * [CVE-2022-20135：多出4个字节，但无法通过 readByteArray 检查](#cve-2022-20135%E5%A4%9A%E5%87%BA4%E4%B8%AA%E5%AD%97%E8%8A%82%E4%BD%86%E6%97%A0%E6%B3%95%E9%80%9A%E8%BF%87-readbytearray-%E6%A3%80%E6%9F%A5)%                                                      
+  * [CVE-2022-20135：多出4个字节，但无法通过 readByteArray 检查](#cve-2022-20135%E5%A4%9A%E5%87%BA4%E4%B8%AA%E5%AD%97%E8%8A%82%E4%BD%86%E6%97%A0%E6%B3%95%E9%80%9A%E8%BF%87-readbytearray-%E6%A3%80%E6%9F%A5)                                                  
 
 ## 漏洞总览
 
