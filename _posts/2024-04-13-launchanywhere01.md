@@ -1,12 +1,35 @@
 ---
-title: LaunchAnyWhere 漏洞现世：Google Bug 7699048 复现与分析（Android 4.3）
+title: LaunchAnyWhere 漏洞现世：GoogleBug 7699048 复现与分析(Android4.3)
 date: 2024-04-13 00:00:00
 categories:
 - CTF/Android
 tags: 
 ---
 
-> ...
+- [漏洞简介](#%E6%BC%8F%E6%B4%9E%E7%AE%80%E4%BB%8B)
+- [复现环境](#%E5%A4%8D%E7%8E%B0%E7%8E%AF%E5%A2%83)
+- [exp 相关](#exp-%E7%9B%B8%E5%85%B3)
+  * [exp demo](#exp-demo)
+  * [exp 调用梳理](#exp-%E8%B0%83%E7%94%A8%E6%A2%B3%E7%90%86)
+  * [exp demo 的 bug](#exp-demo-%E7%9A%84-bug)
+  * [exp 简化](#exp-%E7%AE%80%E5%8C%96)
+- [调试方法](#%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95)
+  * [断app](#%E6%96%ADapp)
+  * [断system_server](#%E6%96%ADsystem_server)
+  * [断settings](#%E6%96%ADsettings)
+- [漏洞过程分析](#%E6%BC%8F%E6%B4%9E%E8%BF%87%E7%A8%8B%E5%88%86%E6%9E%90)
+  * [(step 0) [exp]：MainActivity（Activity）：onCreate：trigger：startActivity](#step-0-expmainactivityactivityoncreatetriggerstartactivity)
+  * [(………..) [Settings]：AddAccountSettings（Activity）：onCreate：startActivityForResult](#-settingsaddaccountsettingsactivityoncreatestartactivityforresult)
+  * [(………..) [Settings]：ChooseAccountActivity（Activity）：onCreate：onAuthDescriptionsUpdated：finish](#-settingschooseaccountactivityactivityoncreateonauthdescriptionsupdatedfinish)
+  * [(step 1) [Settings]：AddAccountSettings（Activity）：onActivityResult：addAccount：AccountManager.get(this).addAccount](#step-1-settingsaddaccountsettingsactivityonactivityresultaddaccountaccountmanagergetthisaddaccount)
+  * [(step 2) [system_server]: AccountManagerService（IAccountManager.Stub）：addAccount：new Session(){}：mAuthenticator.addAccount](#step-2-system_server-accountmanagerserviceiaccountmanagerstubaddaccountnew-sessionmauthenticatoraddaccount)
+  * [(step 3) [exp]: MyAuthenticator(AbstractAccountAuthenticator)： addAccount：return](#step-3-exp-myauthenticatorabstractaccountauthenticator-addaccountreturn)
+  * [(！bug) [system_server]：AccountManagerService（IAccountManager.Stub）：Session(){}：onResult：response.onResult](#bug-system_serveraccountmanagerserviceiaccountmanagerstubsessiononresultresponseonresult)
+  * [(step 4) [Settings]：AddAccountSettings（Activity）：mCallback：run：startActivityForResult](#step-4-settingsaddaccountsettingsactivitymcallbackrunstartactivityforresult)
+- [补丁分析](#%E8%A1%A5%E4%B8%81%E5%88%86%E6%9E%90)
+  * [补丁简介](#%E8%A1%A5%E4%B8%81%E7%AE%80%E4%BB%8B)
+  * [补丁环境](#%E8%A1%A5%E4%B8%81%E7%8E%AF%E5%A2%83)
+  * [补丁调试](#%E8%A1%A5%E4%B8%81%E8%B0%83%E8%AF%95)
 
 
 ## 漏洞简介
@@ -278,11 +301,11 @@ package:/system/app/Settings.apk
 - Settings的进程名实际为包名com.android.settings，简写为 **Settings**
 
 
-### (step 0) [exp]：`MainActivity（Activity）：onCreate：trigger：startActivity`
+### (step 0) [exp]：MainActivity（Activity）：onCreate：trigger：startActivity
 
 
 - **类名: com.xuan.launchanywhere.MainActivity**
-- **源码:** [https://github.com/xuanxuanblingbling/geekcon-android/blob/master/launchAnyWhere/app/src/main/java/com/xuan/launchanywhere/MainActivity.java](https://github.com/xuanxuanblingbling/geekcon-android/blob/master/launchAnyWhere/app/src/main/java/com/xuan/launchanywhere/MainActivity.java)
+- [https://github.com/xuanxuanblingbling/geekcon-android/blob/master/launchAnyWhere/app/src/main/java/com/xuan/launchanywhere/MainActivity.java](https://github.com/xuanxuanblingbling/geekcon-android/blob/master/launchAnyWhere/app/src/main/java/com/xuan/launchanywhere/MainActivity.java)
 
 首先是我们exp中的trigger函数发送的intent，调出到settings中的**AddAccountSettings**， 因为是intent我们自己构造的，所以调试窗口看到的变量信息没有什么特殊的：
 
@@ -300,12 +323,12 @@ package:/system/app/Settings.apk
 所以解下来要断到Settings中，无需中断本次app的调试，直接在另一个调试settings的窗口打断，然后在本次app的调试窗口中继续执行，断点断下后，AS会自动切换到调试settings的窗口。
 
 
-### (………) [Settings]：`AddAccountSettings（Activity）：onCreate：startActivityForResult`
+### (………..) [Settings]：AddAccountSettings（Activity）：onCreate：startActivityForResult
 
 
 
 - **类名: com.android.settings.accounts.AddAccountSettings**
-- **源码:** [https://android.googlesource.com/platform/packages/apps/Settings/+/refs/tags/android-4.3_r3/src/com/android/settings/accounts/AddAccountSettings.java](https://android.googlesource.com/platform/packages/apps/Settings/+/refs/tags/android-4.3_r3/src/com/android/settings/accounts/AddAccountSettings.java)
+- [https://android.googlesource.com/platform/packages/apps/Settings/+/refs/tags/android-4.3_r3/src/com/android/settings/accounts/AddAccountSettings.java](https://android.googlesource.com/platform/packages/apps/Settings/+/refs/tags/android-4.3_r3/src/com/android/settings/accounts/AddAccountSettings.java)
 
 来到Settings的AddAccountSettings.java的onCreate函数，可以看到this.mintent就是启动此Activity所使用的intent，不过从此intent和this所有成员中均无法看出来是我的exp(`com.xuan.launchanywhere`)发起的此次调用，好像是在API22 (Android 5.1)才有this.getReferrer().getHost()方法获得调用者：
 
@@ -329,11 +352,11 @@ package:/system/app/Settings.apk
 
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere1/ChooseAccountActivity.png)
 
-### (………) [Settings]：`ChooseAccountActivity（Activity）：onCreate：onAuthDescriptionsUpdated：finish`
+### (………..) [Settings]：ChooseAccountActivity（Activity）：onCreate：onAuthDescriptionsUpdated：finish
 
 
 - **类名: com.android.settings.accounts.ChooseAccountActivity**
-- **源码:** [https://android.googlesource.com/platform/packages/apps/Settings/+/refs/tags/android-4.3_r3/src/com/android/settings/accounts/AddAccountSettings.java](https://android.googlesource.com/platform/packages/apps/Settings/+/refs/tags/android-4.3_r3/src/com/android/settings/accounts/ChooseAccountActivity.java)
+- [https://android.googlesource.com/platform/packages/apps/Settings/+/refs/tags/android-4.3_r3/src/com/android/settings/accounts/AddAccountSettings.java](https://android.googlesource.com/platform/packages/apps/Settings/+/refs/tags/android-4.3_r3/src/com/android/settings/accounts/ChooseAccountActivity.java)
 
 通过AddAccountSettings的`startActivityForResult`来到ChooseAccountActivity的onCreate函数，经过分析在ChooseAccountActivity中整个的调用流程为：
 
@@ -358,11 +381,11 @@ onCreate → updateAuthDescriptions → onAuthDescriptionsUpdated →  finishWit
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere1/finishWithAccountType.png)
 
 
-### (step 1) [Settings]：`AddAccountSettings（Activity）：onActivityResult：addAccount：AccountManager.get(this).addAccount`
+### (step 1) [Settings]：AddAccountSettings（Activity）：onActivityResult：addAccount：AccountManager.get(this).addAccount
 
 
 - **类名: com.android.settings.accounts.AddAccountSettings**
-- **源码:** [https://android.googlesource.com/platform/packages/apps/Settings/+/refs/tags/android-4.3_r3/src/com/android/settings/accounts/AddAccountSettings.java](https://android.googlesource.com/platform/packages/apps/Settings/+/refs/tags/android-4.3_r3/src/com/android/settings/accounts/AddAccountSettings.java)
+- [https://android.googlesource.com/platform/packages/apps/Settings/+/refs/tags/android-4.3_r3/src/com/android/settings/accounts/AddAccountSettings.java](https://android.googlesource.com/platform/packages/apps/Settings/+/refs/tags/android-4.3_r3/src/com/android/settings/accounts/AddAccountSettings.java)
 
 
 之前从AddAccountSettings折腾到ChooseAccountActivity，又回到AddAccountSettings，其实还没有从settings进程出去，也其实还没到攻击流程图中的step1。现在回到AddAccountSettings的onActivityResult，这里终于要从Settings进程出去了：
@@ -389,13 +412,13 @@ onCreate → updateAuthDescriptions → onAuthDescriptionsUpdated →  finishWit
 
 
 
-### (step 2) [system_server]: `AccountManagerService（IAccountManager.Stub）：addAccount：new Session(){}：mAuthenticator.addAccount`
+### (step 2) [system_server]: AccountManagerService（IAccountManager.Stub）：addAccount：new Session(){}：mAuthenticator.addAccount
 
 
 > 调试system_server可以复用exp的窗口，也可以单独打开窗口加载对应的sdk源码进行调试
 > 
 - **类名: com.android.server.accounts.AccountManagerService**
-- **源码:** [http://androidxref.com/4.3_r2.1/xref/frameworks/base/services/java/com/android/server/ accounts/AccountManagerService.java](http://androidxref.com/4.3_r2.1/xref/frameworks/base/services/java/com/android/server/accounts/AccountManagerService.java)
+- [http://androidxref.com/4.3_r2.1/xref/frameworks/base/services/java/com/android/server/ accounts/AccountManagerService.java](http://androidxref.com/4.3_r2.1/xref/frameworks/base/services/java/com/android/server/accounts/AccountManagerService.java)
 
 
 将断点断在AccountManagerService.java的addAccount函数开头处，如1456行，成功断下（1447行无法断下），在addAccount中经过一系列操作会走到1487行的new Session，这句写法有一些奇怪，仔细解释一下这种写法：匿名内部类（匿名类）
@@ -447,11 +470,11 @@ onCreate → updateAuthDescriptions → onAuthDescriptionsUpdated →  finishWit
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere1/step2.png)
 
 
-### (step 3) [exp]: `MyAuthenticator(AbstractAccountAuthenticator)： addAccount：return`
+### (step 3) [exp]: MyAuthenticator(AbstractAccountAuthenticator)： addAccount：return
 
 
 - **类名: com.xuan.launchanywhere.MyAuthenticator**
-- **源码:** [https://github.com/xuanxuanblingbling/geekcon-android/blob/master/launchAnyWhere/app/src/main/java/com/xuan/launchanywhere/MyAuthenticator.java](https://github.com/xuanxuanblingbling/geekcon-android/blob/master/launchAnyWhere/app/src/main/java/com/xuan/launchanywhere/MyAuthenticator.java)
+- [https://github.com/xuanxuanblingbling/geekcon-android/blob/master/launchAnyWhere/app/src/main/java/com/xuan/launchanywhere/MyAuthenticator.java](https://github.com/xuanxuanblingbling/geekcon-android/blob/master/launchAnyWhere/app/src/main/java/com/xuan/launchanywhere/MyAuthenticator.java)
 
 断点回到exp中的MyAuthenticator.addAccount，就是返回payload bundle：
 
@@ -464,11 +487,11 @@ onCreate → updateAuthDescriptions → onAuthDescriptionsUpdated →  finishWit
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere1/step3.png)
 
 
-### (！bug) [system_server]：`AccountManagerService（IAccountManager.Stub）：Session(){}：onResult：response.onResult`
+### (！bug) [system_server]：AccountManagerService（IAccountManager.Stub）：Session(){}：onResult：response.onResult
 
 
 - **类名: com.android.server.accounts.AccountManagerService**
-- **源码:** [http://androidxref.com/4.3_r2.1/xref/frameworks/base/services/java/com/android/server/ accounts/AccountManagerService.java](http://androidxref.com/4.3_r2.1/xref/frameworks/base/services/java/com/android/server/accounts/AccountManagerService.java)
+- [http://androidxref.com/4.3_r2.1/xref/frameworks/base/services/java/com/android/server/ accounts/AccountManagerService.java](http://androidxref.com/4.3_r2.1/xref/frameworks/base/services/java/com/android/server/accounts/AccountManagerService.java)
 
 
 回到AccountManagerService.java中Session抽象类的onResult，断点到此函数开头成功命中，参数就是从exp的addAccount返回的payload bundle。通过调试窗口可以观察返回变量名为result的payload bundle，可见此时bundle的mMap中还没有任何内容，而mParcelledData还是有值的，所以此时这个payload bundle还没有反序列化：
@@ -518,11 +541,11 @@ onCreate → updateAuthDescriptions → onAuthDescriptionsUpdated →  finishWit
 
 
 
-### (step 4) [Settings]：`AddAccountSettings（Activity）：mCallback：run：startActivityForResult`
+### (step 4) [Settings]：AddAccountSettings（Activity）：mCallback：run：startActivityForResult
 
 
 - **类名: com.android.settings.accounts.AddAccountSettings**
-- **源码:** [https://android.googlesource.com/platform/packages/apps/Settings/+/refs/tags/android-4.3_r3/src/com/android/settings/accounts/AddAccountSettings.java](https://android.googlesource.com/platform/packages/apps/Settings/+/refs/tags/android-4.3_r3/src/com/android/settings/accounts/AddAccountSettings.java)
+- [https://android.googlesource.com/platform/packages/apps/Settings/+/refs/tags/android-4.3_r3/src/com/android/settings/accounts/AddAccountSettings.java](https://android.googlesource.com/platform/packages/apps/Settings/+/refs/tags/android-4.3_r3/src/com/android/settings/accounts/AddAccountSettings.java)
 
 step1中Settings调用 AccountManager.get(this).addAccount时传递了一个回调函数**mCallback**，当AccountManagerService.java中Session抽象类onResult调用response.onResult时，返回到Settings中，即会触发mCallback函数的执行。断点断到这，即可看到这里会**解析返回bundle中的intent**：
 
@@ -550,7 +573,7 @@ bundle.get和bundle.getParcelable基本没有区别：
 
 > [https://android.googlesource.com/platform/frameworks/base/+/5bab9da^!/#F0](https://android.googlesource.com/platform/frameworks/base/+/5bab9da%5E%21/#F0)
 
-```diff
+```patch
 +   @Override
     public void onResult(Bundle result) {
         mNumResults++;
