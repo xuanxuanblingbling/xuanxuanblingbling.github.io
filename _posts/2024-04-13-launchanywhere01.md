@@ -1,6 +1,6 @@
 ---
 title: LaunchAnyWhere 漏洞现世：GoogleBug 7699048 复现与分析(Android4.3)
-date: 2024-04-13 00:00:00
+date: 2024-04-13 00:00:03
 categories:
 - CTF/Android
 tags: 
@@ -275,7 +275,7 @@ package:/system/app/Settings.apk
 
 整体调用过程大概如下：
 
-![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere1/index.png)
+![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere1/index2.png)
 
 
 ### (step 0) [exp]：MainActivity（Activity）：onCreate：trigger：startActivity
