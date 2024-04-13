@@ -1,5 +1,5 @@
 ---
-title: LaunchAnyWhere 漏洞现世：GoogleBug 7699048 复现与分析(Android4.3)
+title: LaunchAnyWhere 漏洞现世：Google Bug 7699048 复现与分析(Android4.3)
 date: 2024-04-13 00:00:03
 categories:
 - CTF/Android
@@ -11,9 +11,9 @@ tags:
 
 ## 漏洞简介
 
-[launchAnyWhere: Activity组件权限绕过漏洞解析(Google Bug 7699048)](https://blogs.360.cn/post/launchanywhere-google-bug-7699048.html)
+[launchAnyWhere: Activity组件权限绕过漏洞解析(Google Bug 7699048)](http://retme.net/index.php/2014/08/20/launchAnyWhere.html)
 
-从效果上：恶意APP可向Settings系统APP发起intent调用，最终可**以Settings的权限即system权限**，发送任意intent，从而启动各种未导出的Activity等。例如绕过老密码，直接设置新密码。
+从效果上：恶意APP可向Settings系统APP发起intent调用，最终可**以Settings APP的权限即system权限**，发送任意intent，可进行直接拨打电话或者发送短信的恶意操作，或者启动各种未导出的Activity，进而绕过老密码，直接设置新密码。
 
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere1/app.png)
 
