@@ -6,31 +6,7 @@ categories:
 tags: 
 ---
 
-- [漏洞简介](#%E6%BC%8F%E6%B4%9E%E7%AE%80%E4%BB%8B)
-- [复现环境](#%E5%A4%8D%E7%8E%B0%E7%8E%AF%E5%A2%83)
-- [exp 相关](#exp-%E7%9B%B8%E5%85%B3)
-  * [exp demo](#exp-demo)
-  * [exp 调用梳理](#exp-%E8%B0%83%E7%94%A8%E6%A2%B3%E7%90%86)
-  * [exp demo 的 bug](#exp-demo-%E7%9A%84-bug)
-  * [exp 简化](#exp-%E7%AE%80%E5%8C%96)
-- [调试方法](#%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95)
-  * [断app](#%E6%96%ADapp)
-  * [断system_server](#%E6%96%ADsystem_server)
-  * [断settings](#%E6%96%ADsettings)
-- [漏洞过程分析](#%E6%BC%8F%E6%B4%9E%E8%BF%87%E7%A8%8B%E5%88%86%E6%9E%90)
-  * [(step 0) [exp]：MainActivity（Activity）：onCreate：trigger：startActivity](#step-0-expmainactivityactivityoncreatetriggerstartactivity)
-  * [(………..) [Settings]：AddAccountSettings（Activity）：onCreate：startActivityForResult](#-settingsaddaccountsettingsactivityoncreatestartactivityforresult)
-  * [(………..) [Settings]：ChooseAccountActivity（Activity）：onCreate：onAuthDescriptionsUpdated：finish](#-settingschooseaccountactivityactivityoncreateonauthdescriptionsupdatedfinish)
-  * [(step 1) [Settings]：AddAccountSettings（Activity）：onActivityResult：addAccount：AccountManager.get(this).addAccount](#step-1-settingsaddaccountsettingsactivityonactivityresultaddaccountaccountmanagergetthisaddaccount)
-  * [(step 2) [system_server]: AccountManagerService（IAccountManager.Stub）：addAccount：new Session(){}：mAuthenticator.addAccount](#step-2-system_server-accountmanagerserviceiaccountmanagerstubaddaccountnew-sessionmauthenticatoraddaccount)
-  * [(step 3) [exp]: MyAuthenticator(AbstractAccountAuthenticator)： addAccount：return](#step-3-exp-myauthenticatorabstractaccountauthenticator-addaccountreturn)
-  * [(！bug) [system_server]：AccountManagerService（IAccountManager.Stub）：Session(){}：onResult：response.onResult](#bug-system_serveraccountmanagerserviceiaccountmanagerstubsessiononresultresponseonresult)
-  * [(step 4) [Settings]：AddAccountSettings（Activity）：mCallback：run：startActivityForResult](#step-4-settingsaddaccountsettingsactivitymcallbackrunstartactivityforresult)
-- [补丁分析](#%E8%A1%A5%E4%B8%81%E5%88%86%E6%9E%90)
-  * [补丁简介](#%E8%A1%A5%E4%B8%81%E7%AE%80%E4%BB%8B)
-  * [补丁环境](#%E8%A1%A5%E4%B8%81%E7%8E%AF%E5%A2%83)
-  * [补丁调试](#%E8%A1%A5%E4%B8%81%E8%B0%83%E8%AF%95)
-
+> 使用Android Studio和Android模拟器完整调试LaunchAnyWhere漏洞的整个过程，包括exp代码、Settings APP和system_server进程这三部分代码的调试与理解。
 
 
 ## 漏洞简介
@@ -44,7 +20,6 @@ tags:
 从原理上：**Settings系统APP**使用的系统服务**AccountManagerService（进程为system_server）的addAccount功能**，其回传给Settings目标要启动的Activity（图中的step 4），可由恶意APP任意指定（图中的step 3），而**AccountManagerService** 未进行任何检查。
 
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere1/step.png)
-
 
 开发原理：
 
@@ -82,8 +57,6 @@ tags:
 通过点击button，即可自动跳转到修改pin码界面，推荐exp demo：
 
 - [GitHub - stven0king/launchanywhere: study launch anywhere and bundle mismatch bug](https://github.com/stven0king/launchanywhere/tree/main)
-
-
 
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere1/step.png)
 
@@ -288,7 +261,6 @@ package:/system/app/Settings.apk
 目标就是把下图的调用过程，通过调试器，切切实实的看到一遍：
 
 
-
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere1/step.png)
 
 
@@ -300,6 +272,10 @@ package:/system/app/Settings.apk
 
 - exp的进程名实际为包名com.xuan.launchanywhere，简写为 **exp**
 - Settings的进程名实际为包名com.android.settings，简写为 **Settings**
+
+整体调用过程大概如下：
+
+![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere1/index.png)
 
 
 ### (step 0) [exp]：MainActivity（Activity）：onCreate：trigger：startActivity
@@ -382,7 +358,7 @@ onCreate → updateAuthDescriptions → onAuthDescriptionsUpdated →  finishWit
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere1/finishWithAccountType.png)
 
 
-### (step 1) [Settings]：AddAccountSettings（Activity）：onActivityResult：addAccount：AccountManager.get(this).addAccount
+### (step 1) [Settings]：AddAccountSettings(Activity)：onActivityResult：addAccount：AccountManager.get(this).addAccount
 
 
 - **类名: com.android.settings.accounts.AddAccountSettings**
@@ -417,7 +393,7 @@ onCreate → updateAuthDescriptions → onAuthDescriptionsUpdated →  finishWit
 
 
 > 调试system_server可以复用exp的窗口，也可以单独打开窗口加载对应的sdk源码进行调试
-> 
+
 - **类名: com.android.server.accounts.AccountManagerService**
 - [http://androidxref.com/4.3_r2.1/xref/frameworks/base/services/java/com/android/server/ accounts/AccountManagerService.java](http://androidxref.com/4.3_r2.1/xref/frameworks/base/services/java/com/android/server/accounts/AccountManagerService.java)
 
