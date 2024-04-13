@@ -6,7 +6,7 @@ categories:
 tags: 
 ---
 
-> 用【**故障注入**】的思路理解 Android Bundle Mismatch 系列漏洞
+> 用故障注入的思路：<font color="#448361">【反序列化（老数据）】</font>→【序列化（注入故障）】→ <font color="#D44C47">【反序列化（新数据）】</font>理解 Bundle Mismatch
 
 - [漏洞总览](#%E6%BC%8F%E6%B4%9E%E6%80%BB%E8%A7%88)
 - [利用理解](#%E5%88%A9%E7%94%A8%E7%90%86%E8%A7%A3)
