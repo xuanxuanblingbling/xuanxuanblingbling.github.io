@@ -8,6 +8,51 @@ tags:
 
 > 用【**故障注入**】的思路理解 Android Bundle Mismatch
 
+- [漏洞总览](#%E6%BC%8F%E6%B4%9E%E6%80%BB%E8%A7%88)
+- [利用理解](#%E5%88%A9%E7%94%A8%E7%90%86%E8%A7%A3)
+  * [目标效果：解析不一致](#%E7%9B%AE%E6%A0%87%E6%95%88%E6%9E%9C%E8%A7%A3%E6%9E%90%E4%B8%8D%E4%B8%80%E8%87%B4)
+  * [理解障碍：总计四次的序列化和反序列化](#%E7%90%86%E8%A7%A3%E9%9A%9C%E7%A2%8D%E6%80%BB%E8%AE%A1%E5%9B%9B%E6%AC%A1%E7%9A%84%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96)
+  * [跳过两次：只有一组的不匹配！](#%E8%B7%B3%E8%BF%87%E4%B8%A4%E6%AC%A1%E5%8F%AA%E6%9C%89%E4%B8%80%E7%BB%84%E7%9A%84%E4%B8%8D%E5%8C%B9%E9%85%8D)
+  * [关系绑定：序列化字节、反序列化、JAVA对象内存](#%E5%85%B3%E7%B3%BB%E7%BB%91%E5%AE%9A%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%97%E8%8A%82%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96java%E5%AF%B9%E8%B1%A1%E5%86%85%E5%AD%98)
+  * [三步分析：反序列化 → 序列化 → 反序列化](#%E4%B8%89%E6%AD%A5%E5%88%86%E6%9E%90%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96-%E2%86%92-%E5%BA%8F%E5%88%97%E5%8C%96-%E2%86%92-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96)
+- [复现环境](#%E5%A4%8D%E7%8E%B0%E7%8E%AF%E5%A2%83)
+  * [运行环境：Android Studio AVD](#%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83android-studio-avd)
+  * [bug的源码确认：SDK 下载源码](#bug%E7%9A%84%E6%BA%90%E7%A0%81%E7%A1%AE%E8%AE%A4sdk-%E4%B8%8B%E8%BD%BD%E6%BA%90%E7%A0%81)
+  * [bug的二进制确认：framework.odex](#bug%E7%9A%84%E4%BA%8C%E8%BF%9B%E5%88%B6%E7%A1%AE%E8%AE%A4frameworkodex)
+- [调试方法](#%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95)
+  * [模拟序列化与反序列化的过程](#%E6%A8%A1%E6%8B%9F%E5%BA%8F%E5%88%97%E5%8C%96%E4%B8%8E%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E7%9A%84%E8%BF%87%E7%A8%8B)
+  * [bundle中各种对象的对齐与结构测试](#bundle%E4%B8%AD%E5%90%84%E7%A7%8D%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%AF%B9%E9%BD%90%E4%B8%8E%E7%BB%93%E6%9E%84%E6%B5%8B%E8%AF%95)
+  * [bug类调试](#bug%E7%B1%BB%E8%B0%83%E8%AF%95)
+  * [最终调试结果](#%E6%9C%80%E7%BB%88%E8%B0%83%E8%AF%95%E7%BB%93%E6%9E%9C)
+- [CVE-2017-13315：多出4个字节](#cve-2017-13315%E5%A4%9A%E5%87%BA4%E4%B8%AA%E5%AD%97%E8%8A%82)
+  * [分析套路](#%E5%88%86%E6%9E%90%E5%A5%97%E8%B7%AF)
+  * [细节处理](#%E7%BB%86%E8%8A%82%E5%A4%84%E7%90%86)
+  * [代码简化](#%E4%BB%A3%E7%A0%81%E7%AE%80%E5%8C%96)
+  * [版本测试](#%E7%89%88%E6%9C%AC%E6%B5%8B%E8%AF%95)
+  * [完整利用](#%E5%AE%8C%E6%95%B4%E5%88%A9%E7%94%A8)
+- [CVE-2017-0806：吞掉4个字节](#cve-2017-0806%E5%90%9E%E6%8E%894%E4%B8%AA%E5%AD%97%E8%8A%82)
+  * [故障](#%E6%95%85%E9%9A%9C)
+  * [利用](#%E5%88%A9%E7%94%A8)
+- [CVE-2017-13286：多出4个字节](#cve-2017-13286%E5%A4%9A%E5%87%BA4%E4%B8%AA%E5%AD%97%E8%8A%82)
+  * [故障](#%E6%95%85%E9%9A%9C-1)
+  * [利用](#%E5%88%A9%E7%94%A8-1)
+- [CVE-2017-13287：吞掉4个字节](#cve-2017-13287%E5%90%9E%E6%8E%894%E4%B8%AA%E5%AD%97%E8%8A%82)
+  * [故障](#%E6%95%85%E9%9A%9C-2)
+  * [利用](#%E5%88%A9%E7%94%A8-2)
+- [CVE-2017-13288：多出4个字节](#cve-2017-13288%E5%A4%9A%E5%87%BA4%E4%B8%AA%E5%AD%97%E8%8A%82)
+  * [故障](#%E6%95%85%E9%9A%9C-3)
+  * [利用](#%E5%88%A9%E7%94%A8-3)
+- [CVE-2017-13289：吞掉n个字节](#cve-2017-13289%E5%90%9E%E6%8E%89n%E4%B8%AA%E5%AD%97%E8%8A%82)
+  * [故障](#%E6%95%85%E9%9A%9C-4)
+  * [利用](#%E5%88%A9%E7%94%A8-4)
+  * [CTF赛题](#ctf%E8%B5%9B%E9%A2%98)
+- [CVE-2023-20963：多出4个字节](#cve-2023-20963%E5%A4%9A%E5%87%BA4%E4%B8%AA%E5%AD%97%E8%8A%82)
+  * [故障](#%E6%95%85%E9%9A%9C-5)
+  * [利用](#%E5%88%A9%E7%94%A8-5)
+- [无法利用](#%E6%97%A0%E6%B3%95%E5%88%A9%E7%94%A8)
+  * [CVE-2018-9471：多出4个字节，但超短的生命周期](#cve-2018-9471%E5%A4%9A%E5%87%BA4%E4%B8%AA%E5%AD%97%E8%8A%82%E4%BD%86%E8%B6%85%E7%9F%AD%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F)
+  * [CVE-2021-0970：多出4个字节，但无法通过 parcel.dataAvail 检查](#cve-2021-0970%E5%A4%9A%E5%87%BA4%E4%B8%AA%E5%AD%97%E8%8A%82%E4%BD%86%E6%97%A0%E6%B3%95%E9%80%9A%E8%BF%87-parceldataavail-%E6%A3%80%E6%9F%A5)
+  * [CVE-2022-20135：多出4个字节，但无法通过 readByteArray 检查](#cve-2022-20135%E5%A4%9A%E5%87%BA4%E4%B8%AA%E5%AD%97%E8%8A%82%E4%BD%86%E6%97%A0%E6%B3%95%E9%80%9A%E8%BF%87-readbytearray-%E6%A3%80%E6%9F%A5)%                                                      
 
 ## 漏洞总览
 
@@ -49,7 +94,6 @@ Stven_King：
 - system_server将b1对象序列化传递给Settings
 - Settings解析bundle对象b2中存在intent
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/mismatch.png)
 
 如果目标是构造出system_server和Settings解析不一致的现象，那么有如下推理：
@@ -64,14 +108,13 @@ ByteArray
 
 但如果存在序列化与反序列化不必配的bug类，打破了传递过程的自反性，则在bundle对象的传递过程中就可能构造出改变的bundle对象，进而构造出system_server和Settings解析不一致的现象。可以使用之前的攻击流程图，从step 3开始解释：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/step.png)
 
 
--  <font color="#D44C47">**【正序列化 ①】**</font>【exp】：手动构造一个非直接调用bug类序列化的bundle，payload直接存在于bundle的mParcelledData中，因此bundle传递出去时的序列化不会触发bug类的正常序列化
-- <font color="#448361">**【反序列化 ①】**</font>【system_server】：彻底反序列化bundle，将解析所有mParcelledData，没有找到key为intent的元素，跳过对intent的目标检查
-- <font color="#D44C47">**【正序列化 ②】**</font>【system_server】：再次对bundle序列化，由于mParcelledData已经为空，所以将触发bug类的正常序列化，由于bug类，bundle将出现错位
-- <font color="#448361">**【反序列化 ②】**</font>【Settings】：反序列化bundle，因为bundle的错位，将解析出key为intent元素，则此恶意intent将被启动
+- <font color="#D44C47">【正序列化 ①】</font>【exp】：手动构造一个非直接调用bug类序列化的bundle，payload直接存在于bundle的mParcelledData中，因此bundle传递出去时的序列化不会触发bug类的正常序列化
+- <font color="#448361">【反序列化 ①】</font>【system_server】：彻底反序列化bundle，将解析所有mParcelledData，没有找到key为intent的元素，跳过对intent的目标检查
+- <font color="#D44C47">【正序列化 ②】</font>【system_server】：再次对bundle序列化，由于mParcelledData已经为空，所以将触发bug类的正常序列化，由于bug类，bundle将出现错位
+- <font color="#448361">【反序列化 ②】</font>【Settings】：反序列化bundle，因为bundle的错位，将解析出key为intent元素，则此恶意intent将被启动
 
 
 ### 理解障碍：总计四次的序列化和反序列化
@@ -91,7 +134,6 @@ ByteArray
 
 所以整个攻击过程可以表达为：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/attack.png)
 
 
@@ -120,7 +162,6 @@ ByteArray
 
 例如：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/readfromparcel.png)
 
 
@@ -145,7 +186,6 @@ ByteArray
 
 按照数据对等，总共只有红绿两组不同的数据，每种颜色里的数据就是可以当成是一回事，就是反序列化两侧的JAVA内存对象和序列化字节**。**所以整个攻击中，我们需要分析的**序列化字节只有两种：**
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/attack2.png)
 
 
@@ -161,25 +201,23 @@ ByteArray
 
 - 不是：<font color="#787774">【序列化 → 反序列化】→【序列化 → 反序列化】</font>
 - 不是：<font color="#787774"> 序列化】 →【 反序列化 → 序列化】 → 【反序列化</font>
-- **而是：<font color="#448361">【反序列化（老数据）】</font>→【序列化（注入变化）】 → <font color="#D44C47">【反序列化（新数据）】**</font>
+- 而是：<font color="#448361">【反序列化（老数据）】</font>→【序列化（注入变化）】 → <font color="#D44C47">【反序列化（新数据）】</font>
 
 > 以[Android 反序列化漏洞攻防史话](https://evilpan.com/2023/02/18/parcel-bugs/)中的分析为例，反序列化其实就是图中对数据画线的解析过程，所以有分析几组数据，就有几次反序列化  
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/attack3.png)
 
 
 例如对CVE-2017-13315的分析，即可遵循这三步：
 
-> **<font color="#448361">【反序列化（老数据）】</font>→【序列化（注入变化）】 → <font color="#D44C47">【反序列化（新数据）】**</font>
+> <font color="#448361">【反序列化（老数据）】</font>→【序列化（注入变化）】 → <font color="#D44C47">【反序列化（新数据）】</font>
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/attack4.png)
 
 对于这个反序列化理解下来，感觉还是有一些绕，之前分析php的反序列化很直接，顶多就是类嵌套等，没有涉及到多次解析等情景，这其中的差异其实是有漏洞发生情景的本质区别：
 
 - php那种反序列化漏洞：是反序列化时纯纯的解析漏洞，角色就两个，发送和接收
-- Bundle mismatch漏洞：反序列化的解析过程没有任何问题，而是对bundle对象进行中转时出的问题，所以这里的角色至少三个
+- Bundle mismatch漏洞：反序列化的解析过程没有问题，而是对bundle对象进行中转时出的问题，所以这里的角色至少三个
 
 最后，从恶意bundle构造的角度上，可以从最后第三步反序列化包含恶意的intent往前推，这个事理解起来就没有那么困难了。
 
@@ -188,19 +226,16 @@ ByteArray
 
 主要使用android studio AVD提供的各种版本虚拟机，统计如下：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/excel2.png)
 
 ### 运行环境：Android Studio AVD
 
 例如Android 7.1.1：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/avd.png)
 
 补丁日期为2018.1.1，统计漏洞中，从CVE-2017-13286（2018.4.1）往后，在目标中均未修补：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/patch_date.png)
 
 
@@ -209,7 +244,6 @@ ByteArray
 
 通过SDK Manager下载源码：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/sdk_download.png)
 
 
@@ -217,7 +251,6 @@ ByteArray
 
 > [https://android.googlesource.com/platform/frameworks/base/+/47ebfaa2196aaf4fbeeec34f1a1c5be415cf041b^!/](https://android.googlesource.com/platform/frameworks/base/+/47ebfaa2196aaf4fbeeec34f1a1c5be415cf041b%5E%21/)
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/13286bug.png)
 
 
@@ -250,20 +283,17 @@ ByteArray
 ### 模拟序列化与反序列化的过程
 
 
-按照上文推理出来的三步分析的点，对应图中 **<font color="#448361">【反序列化（老数据）】</font>→【序列化（注入变化）】 → <font color="#D44C47">【反序列化（新数据）】**</font>，所以所有关键步骤点都在system_server和Settings中，虽然可以按照第一篇[LaunchAnyWhere 漏洞现世](https://xuanxuanblingbling.github.io/ctf/android/2024/04/13/launchanywhere01/)中介绍的调试办法，单独调试system_server和Settings，进而观察序列化和反序列化过程。但对于调试exp的中不断对payload进行修改的过程来说，这种方法会耽误大量的时间，非常不合适。
+按照上文推理出来的三步分析的点，对应图中 <font color="#448361">【反序列化（老数据）】</font>→【序列化（注入变化）】 → <font color="#D44C47">【反序列化（新数据）】</font>，所以所有关键步骤点都在system_server和Settings中，虽然可以按照第一篇[LaunchAnyWhere 漏洞现世](https://xuanxuanblingbling.github.io/ctf/android/2024/04/13/launchanywhere01/)中介绍的调试办法，单独调试system_server和Settings，进而观察序列化和反序列化过程。但对于调试exp的中不断对payload进行修改的过程来说，这种方法会耽误大量的时间，非常不合适。
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/step.png)
 
 
 所以可以自己复刻整个漏洞的利用过程中对bundle对象的处理过程：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/simulate.png)
 
 简化如下：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/simulate2.png)
 
 
@@ -271,27 +301,22 @@ ByteArray
 
 IntArray：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/IntArray.png)
 
 Byte：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/byte.png)
 
 
 ByteArray:
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/bytearray.png)
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/bytearray2.png)
 
 
 ArrayList:
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/ArrayList.png)
 
 ### bug类调试
@@ -305,7 +330,6 @@ ByteArray
 
 使用以上的方法，就可以忽略system_server和Settings，单独调试bug类的序列化和反序列化情况：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/mismatch.png)
 
 
@@ -333,7 +357,7 @@ bug点非常明显和简单：
 
 ### 分析套路
 
-分析遵循 **<font color="#448361">【反序列化（老数据）】</font>→【序列化（注入变化）】 → <font color="#D44C47">【反序列化（新数据）】**</font>，所以分析的核心就是注入的变化是什么？因为我在硬件安全公司，那么不妨这种变化称为**故障注入**，因此这里就会**故障多出4个字节的 00**（int to long），那么这4个00字节的如何利用呢？首先有一些**套路：**
+分析遵循 <font color="#448361">【反序列化（老数据）】</font>→【序列化（注入变化）】 → <font color="#D44C47">【反序列化（新数据）】</font>，所以分析的核心就是注入的变化是什么？因为我在硬件安全公司，那么不妨这种变化称为**故障注入**，因此这里就会**故障多出4个字节的 00**（int to long），那么这4个00字节的如何利用呢？首先有一些**套路：**
 
 - **老数据的第一个对象必然是bug类对象**
 - **老数据中不能直接存在intent，所以其实intent一般包在一个ByteArray中**
@@ -364,7 +388,6 @@ bug点非常明显和简单：
 
 可以对着hexdump相面理解：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/mismatch.png)
 
 ### 细节处理
@@ -382,35 +405,31 @@ ByteArray
 
 所以按照以上这个固定的情况，有如下设计：
 
-- <font color="#D44C47">**需要新对象type，可以吞掉：后续的package_key的后续data + 13 + length**</font>
-- <font color="#D44C47">**所以若package_key的data只有四个字节，只需这个type吞掉后续的 13 + length，总计8个字节**</font>
-- <font color="#D44C47">**所以type期望为long即可，即package_key的data的只有四个字节，值6**</font>
-- <font color="#D44C47">**由于package_key的data只有四个字节，此时其的size为1 (宽字节、结尾带00、四字节对齐)**</font>
+- <font color="#D44C47">需要新对象type，可以吞掉：后续的package_key的后续data + 13 + length</font>
+- <font color="#D44C47">所以若package_key的data只有四个字节，只需这个type吞掉后续的 13 + length，总计8个字节</font>
+- <font color="#D44C47">所以type期望为long即可，即package_key的data的只有四个字节，值6</font>
+- <font color="#D44C47">由于package_key的data只有四个字节，此时其的size为1 (宽字节、结尾带00、四字节对齐)</font>
 
 综上package_key为：int(1) + int(6)，即一个名字为char(6)的ByteArray对象，大概理解如图：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/attack4.png)
 
 ### 代码简化
 
 写了两个简化函数 make_intent 和 payload_to_bundle，简化了intent和最后bundle的封装：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/exp_func.png)
 
 ### 版本测试
 
 在不同的API版本上测试结果如下：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/13315ver.png)
 
 有如下细节区别：
 
 （1）Android 4.4 上，bundle序列化中的对象个数，类型为long，而不是int：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/intorlong.png)
 
 （2）Android 8.1 及 之后，启动的修改锁屏密码的界面类名出现变化：
@@ -422,7 +441,6 @@ ByteArray
 
 完整代码如下，需要注意，三个对象的名字会影响再次序列化的顺序，如果下次序列化将bug类放在后面，整个利用就失效了，所以有时需要通过调试和修改对象名字将顺序固定：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/13315exp.png)
 
 
@@ -441,7 +459,6 @@ ByteArray
 - 以反序列化过程为锚点，正常n字节，经过bug的序列化后，总计n-4个字节
 - 因此可以理解为注入的故障为：**吞掉4个字节**
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/0806.png)
 
 仔细分析有的bug源码中的序列化函数，触发漏洞的分支是：
@@ -453,7 +470,6 @@ ByteArray
 > [core/java/android/service/gatekeeper/GateKeeperResponse.java - platform/frameworks/base - Git at Google](https://android.googlesource.com/platform/frameworks/base/+/c574568aaede7f652432deb7707f20ae54bbdf9a/core/java/android/service/gatekeeper/GateKeeperResponse.java)
 
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/0806bug.png)
 
 分析反序列化函数，即Parcelable.Creator：
@@ -462,7 +478,6 @@ ByteArray
 - int：shouldReEnroll ：任意
 - int：size：为0即可，当序列化时，此0不会被写入，触发漏洞
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/0806bug2.png)
 
 ### 利用
@@ -471,7 +486,6 @@ ByteArray
 
 > 对象个数暂定为3，因为通用套路中，后面需要接一个ByteArray包含intent，错位就是在bug类和intent出，构造一个新对象，吞掉ByteArray的头。
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/0806exp1.png)
 
 
@@ -481,13 +495,11 @@ ByteArray
 - 如果A解析出的int大于0，则还要继续通过readByteArray吞掉后面的数据
 - readByteArray所读取的字节数组，前面还需要有4个字节的size，称这4个字节为 **B**
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/0806exp2.png)
 
 
 在这个情况下，bug类吞掉的A、B，必须相等，才能通过readByteArray的检查：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/0806check.png)
 
 
@@ -499,7 +511,6 @@ ByteArray
 - -1被吞掉后，13作为接下来的key size，其所对应的字符字节为（13+1）*2 == 28 字节
 - 所以只需要在intent前加上一些padding，并构造出新字节的type和value即可
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/0806exp3.png)
 
 ## CVE-2017-13286：多出4个字节
@@ -513,14 +524,12 @@ ByteArray
 
 bug很好看，就是少读了4个字节，所以相当于故障多出4个字节：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/13286bug2.png)
 
 ### 利用
 
 但这个mIsShared是API 26 即Android 8加入的bug，Android 9就修掉了，并且漏洞公告日期为：2018.04.01，Android 8的AVD补丁为2018.04.05。只有Android 8.1的AVD补丁日期为2018.1.5，可以达成，所以这个漏洞的生命周期也有些短，利用如下：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/13286exp.png)
 
 
@@ -534,17 +543,14 @@ ByteArray
 
 [Diff - 09ba8fdffd9c8d74fdc6bfb51bcebc27fc43884a^! - platform/frameworks/base - Git at Google](https://android.googlesource.com/platform/frameworks/base/+/09ba8fdffd9c8d74fdc6bfb51bcebc27fc43884a^!/)
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/13287bug1.png)
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/13287bug2.png)
 
 ### 利用
 
 CVE-2017-0806完全一致，只需要在构造对象时去掉shouldReEnroll：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/13287exp.png)
 
 ## CVE-2017-13288：多出4个字节
@@ -561,12 +567,10 @@ patch非常明显：写多了4个字节：
 > [Diff - b796cd32a45bcc0763c50cc1a0cc8236153dcea3^! - platform/frameworks/base - Git at Google](https://android.googlesource.com/platform/frameworks/base/+/b796cd32a45bcc0763c50cc1a0cc8236153dcea3^!/)
 
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/13288bug.png)
 
 ### 利用
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/13288exp.png)
 
 
@@ -593,19 +597,16 @@ patch可见：
 - 因此LCR.id也为1，否则无法通过readByteArray的检查
 
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/13289bug.png)
 
 ### 利用
 
 废物成员较多，直接使用padding：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/13289exp.png)
 
 另外不要忘了构造完byte array后面还有一个成员secure：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/13289exp2.png)
 
 ### CTF赛题
@@ -618,15 +619,12 @@ ByteArray
 - 封装的不是intent，而是一个strings
 - 并且strings和padding的key都得是command，可能要注意名字的hashcode影响排序
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/13289ctfexp.png)
 
 成功打印 Congratulations：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/ctf1.png)
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/ctf2.png)
 
 ## CVE-2023-20963：多出4个字节
@@ -647,15 +645,12 @@ ByteArray
 - numChains 也是将要通过readParcelableList 读取 ArrayList 的 长度
 - 所以关键应该就是 0 长的 ArrayList 问题：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/20963bug1.png)
 
 未patch前的反序列化和序列化函数如下，带入0长的ArrayList分析：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/20963bug2.png)
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/20963bug3.png)
 
 - 构造的序列化数据，第一次被system_server反序列化时，如果numChains为0，则后续没有数据
@@ -680,14 +675,12 @@ ByteArray
 
 但非常幸运的是readParcelableList，没有任何检查，无论新建的ArrayList长度本身多大，直接给个 -1 或者是 0 ，就可以把ArrayList清空，**所以write多写了四个字节的00故障成立！**
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/20963bug4.png)
 
 ### 利用
 
 错位后的利用CVE-2017-13315完全一致：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/20963exp.png)
 
 
@@ -702,27 +695,22 @@ ByteArray
 - patch把read改长了4
 - 所以bug时，write 8个字节，read 4 个字节，即故障效果为多四个字节
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/9471bug.png)
 
 所以从技术上来说这个漏洞完全可以利用，并且利用很简单，exp如下：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/9471exp.png)
 
 但很有意思的是，目标类 android.hardware.location.NanoAppFilter 在API 27版本及之前，定义上没有实现Parcelable接口，因此也就无法正常反序列化，也就无法利用：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/9471bug2.png)
 
 直到API 28 才实现Parcelable接口，可以正常反序列化：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/9471bug3.png)
 
 但目标漏洞在API 29 就已经被修掉了：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/9471bug4.png)
 
 **所以这个漏洞的生命周期很短，仅存在API 28，即Android 9上**，此漏洞的公告时间为：2018.9.1：
@@ -731,12 +719,10 @@ ByteArray
 
 虽然AS提供的SDK源码中漏洞还在，并且AVD上的Android 9的**补丁日期2018.8.5**，要早于**漏洞公告的2018.9.1**，但经过调试发现其实patch已经生效，所以漏洞**公告日期**和**补丁日期**貌似也**不太对应**：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/9471patch.png)
 
 **在手边的Android 9设备中，补丁都是到2019年的，所以在实际情况中，不太能找到存在此洞的目标**
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/excel3.png)
 
 **因此这个洞，相当于无法利用，毕竟连个目标都没有…**
@@ -752,17 +738,14 @@ ByteArray
 - 所以可以理解为write时必定要写的4字节没有被下一次读取
 - 所以就相当于注入了一个多出4字节的故障
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/0970bug.png)
 
 尝试按照 CVE-2017-13315：多出4个字节的方法进行利用，利用代码大概如下：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/0970exp.png)
 
 但通过调试发现，此bug分支触发，需要通过parcel.dataAvail()确定parcel中剩余字节数小于32，而我们必须在此parcel后封装恶意intent，但仅是intent的类名就差不多超了32个字节，所以虽然可以触发这个bug，但是要在后面拼上intent就无法触发此bug分支了，因此，我认为这个漏洞无法利用：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/bugclass.png)
 
 ### CVE-2022-20135：多出4个字节，但无法通过 readByteArray 检查
@@ -775,12 +758,10 @@ ByteArray
 
 patch如下：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/20135bug.png)
 
 未patch前的序列化函数：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/20135bug2.png)
 
 - 根据patch，bug情况显然是在mPayload.length == 0 时，序列化会写8字节 00
@@ -790,40 +771,32 @@ ByteArray
 - 再次读取时只会读取第一个int(0)，因为size == 0 就不会继续读取了
 - 所以如果以上情况发生，则相当于多出4个字节的00
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/20135bug3.png)
 
 但实际上，因为 **readByteArray 的检查**，在反序列化函数中的size和bytearray的size必须要相等，所以也就无法构造出int(1)+int(0) ，并不能触发在size>0的情况下，构造出0长数组。
 
 > API Level < 27 的检查
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/0806check.png)
 
 > API Level ≥ 27 的检查
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/20135check.png)
 
 尝试构造：0 和 -1 均 失败
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/20135poc1.png)
 
 报错如下：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/20135poc2.png)
 
 调试观察：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/20135poc3.png)
 
 零长数组的序列化观察：
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/20135poc4.png)
 
-ByteArray
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/20135poc5.png)
