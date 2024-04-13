@@ -6,7 +6,7 @@ categories:
 tags: 
 ---
 
-> 用【**故障注入**】的思路理解 Android Bundle Mismatch
+> 用【**故障注入**】的思路理解 Android Bundle Mismatch 系列漏洞
 
 - [漏洞总览](#%E6%BC%8F%E6%B4%9E%E6%80%BB%E8%A7%88)
 - [利用理解](#%E5%88%A9%E7%94%A8%E7%90%86%E8%A7%A3)
@@ -111,10 +111,10 @@ Stven_King：
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/step.png)
 
 
-- <font color="#D44C47">【正序列化 ①】</font>【exp】：手动构造一个非直接调用bug类序列化的bundle，payload直接存在于bundle的mParcelledData中，因此bundle传递出去时的序列化不会触发bug类的正常序列化
-- <font color="#448361">【反序列化 ①】</font>【system_server】：彻底反序列化bundle，将解析所有mParcelledData，没有找到key为intent的元素，跳过对intent的目标检查
-- <font color="#D44C47">【正序列化 ②】</font>【system_server】：再次对bundle序列化，由于mParcelledData已经为空，所以将触发bug类的正常序列化，由于bug类，bundle将出现错位
-- <font color="#448361">【反序列化 ②】</font>【Settings】：反序列化bundle，因为bundle的错位，将解析出key为intent元素，则此恶意intent将被启动
+<font color="#D44C47">【正序列化 ①】</font>【exp】：手动构造一个非直接调用bug类序列化的bundle，payload直接存在于bundle的mParcelledData中，因此bundle传递出去时的序列化不会触发bug类的正常序列化  
+<font color="#448361">【反序列化 ①】</font>【system_server】：彻底反序列化bundle，将解析所有mParcelledData，没有找到key为intent的元素，跳过对intent的目标检查  
+<font color="#D44C47">【正序列化 ②】</font>【system_server】：再次对bundle序列化，由于mParcelledData已经为空，所以将触发bug类的正常序列化，由于bug类，bundle将出现错位  
+<font color="#448361">【反序列化 ②】</font>【Settings】：反序列化bundle，因为bundle的错位，将解析出key为intent元素，则此恶意intent将被启动  
 
 
 ### 理解障碍：总计四次的序列化和反序列化
@@ -208,9 +208,7 @@ Stven_King：
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/attack3.png)
 
 
-例如对CVE-2017-13315的分析，即可遵循这三步：
-
-> <font color="#448361">【反序列化（老数据）】</font>→【序列化（注入变化）】 → <font color="#D44C47">【反序列化（新数据）】</font>
+例如对CVE-2017-13315的分析，即可遵循这三步：<font color="#448361">【反序列化（老数据）】</font>→【序列化（注入变化）】 → <font color="#D44C47">【反序列化（新数据）】</font>
 
 ![image](https://xuanxuanblingbling.github.io/assets/pic/launchanywhere2/attack4.png)
 
